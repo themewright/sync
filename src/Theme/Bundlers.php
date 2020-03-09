@@ -2,7 +2,6 @@
 
 namespace ThemeWright\Sync\Theme;
 
-use ThemeWright\Sync\Filesystem\File;
 use ThemeWright\Sync\Filesystem\Filesystem;
 
 class Bundlers
@@ -91,8 +90,8 @@ class Bundlers
 
         $webpackConfigJs = $this->data->bundlers->webpackConfigJs;
 
-        $this->fs->file('package.json')->setContent($packageJson)->saveWithMessages($this->messages);
-        $this->fs->file('gulpfile.js')->setContent($gulpfileJs)->saveWithMessages($this->messages);
-        $this->fs->file('webpack.config.js')->setContent($webpackConfigJs)->saveWithMessages($this->messages);
+        $this->fs->file('package.json')->setContent($packageJson)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+        $this->fs->file('gulpfile.js')->setContent($gulpfileJs)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+        $this->fs->file('webpack.config.js')->setContent($webpackConfigJs)->doubleSpacesToTabs()->saveWithMessages($this->messages);
     }
 }

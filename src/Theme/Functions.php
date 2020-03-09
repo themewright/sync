@@ -170,15 +170,22 @@ class Functions
                 switch ($chunk['type']) {
                     case 'menu-page':
                         $pattern = '/\/\/ Register a new menu page \(#([0-9]+)\)/';
-                        preg_match($pattern, $_chunk['code'], $_matches);
-                        preg_match($pattern, $chunk['code'], $matches);
-
-                        if ($_matches && $matches && $_matches[1] == $matches[1]) {
-                            return $index;
-                        }
+                        break;
+                    case 'template':
+                        $pattern = '/\/\/ Template specific options: [a-z0-9-]+\.php \(#([0-9]+)\)/';
                         break;
                     default:
+                        $pattern = null;
                         break;
+                }
+
+                if ($pattern) {
+                    preg_match($pattern, $_chunk['code'], $_matches);
+                    preg_match($pattern, $chunk['code'], $matches);
+
+                    if ($_matches && $matches && $_matches[1] == $matches[1]) {
+                        return $index;
+                    }
                 }
             }
         }
@@ -198,6 +205,8 @@ class Functions
             return 'includes';
         } else if (strpos($code, '// Register a new menu page') === 0) {
             return 'menu-page';
+        } else if (strpos($code, '// Template specific options') === 0) {
+            return 'template';
         } else {
             return false;
         }

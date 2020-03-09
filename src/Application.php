@@ -10,8 +10,11 @@ use ThemeWright\Sync\Http\Response;
 use ThemeWright\Sync\Theme\Bundlers;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
+use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
 use ThemeWright\Sync\Theme\Stylesheet;
+use ThemeWright\Sync\Theme\StylesScss;
+use ThemeWright\Sync\Theme\Templates;
 
 class Application
 {
@@ -43,6 +46,9 @@ class Application
         if (file_exists(__DIR__ . '/../../../../.env')) {
             (new Dotenv())->load(__DIR__ . '/../../../../.env');
         }
+
+        // Log errors
+        ini_set('error_log', __DIR__ . '/../error.log');
     }
 
     /**
@@ -78,13 +84,20 @@ class Application
 
         $stylesheet = new Stylesheet($themeDir, $data, $messages);
         $functions = new Functions($themeDir, $data, $messages);
+        $stylesScss = new StylesScss($themeDir, $data, $messages);
+        $mainJs = new MainJs($themeDir, $data, $messages);
 
         if ($action == 'all') {
             $functions->emptyChunks();
+            $stylesScss->emptyPartials();
+            $mainJs->emptyModules();
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             $functions->build();
+            $stylesScss->build();
+            $mainJs->build();
             $stylesheet->build($time);
         } else if ($commit - 1 == $stylesheet->get('commit')) {
             // Doing partially only when 1 commit difference
@@ -97,6 +110,14 @@ class Application
                     break;
                 case 'bundlers':
                     (new Bundlers($themeDir, $data, $messages))->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'template':
+                    (new Bundlers($themeDir, $data, $messages))->build();
+                    (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    $functions->build();
+                    $stylesScss->build();
+                    $mainJs->build();
                     $stylesheet->build($time);
                     break;
                 default:

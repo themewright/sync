@@ -41,10 +41,11 @@ class MenuPages
      *
      * @param  string  $themeDir
      * @param  mixed  $data
+     * @param  \ThemeWright\Sync\Theme\Functions  $functions
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, \ThemeWright\Sync\Theme\Functions &$functions, &$messages = [])
+    public function __construct(string $themeDir, &$data = false, &$functions, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
@@ -81,7 +82,7 @@ class MenuPages
             $view = $this->fs->file('views/menu-pages/' . $menuPage->menuSlug . '.php');
 
             if ($menuPage->scss) {
-                $scss->setContent($menuPage->scss)->saveWithMessages($this->messages);
+                $scss->setContent($menuPage->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
             } else {
                 $css->deleteWithMessages($this->messages);
                 $cssMap->deleteWithMessages($this->messages);
@@ -89,18 +90,22 @@ class MenuPages
             }
 
             if ($menuPage->js) {
-                $mjs->setContent($menuPage->js)->saveWithMessages($this->messages);
+                $mjs->setContent($menuPage->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
             } else {
                 $mjs->deleteWithMessages($this->messages);
                 $js->deleteWithMessages($this->messages);
                 $jsMap->deleteWithMessages($this->messages);
             }
 
-            $elements = array_map(function ($args) {
-                return (new Element($args))->parse();
-            }, $menuPage->view);
+            if ($menuPage->viewRaw) {
+                $viewContent = $menuPage->viewRaw;
+            } else {
+                $elements = array_map(function ($args) {
+                    return (new Element($args))->parse();
+                }, $menuPage->view);
 
-            $viewContent = implode(PHP_EOL, $elements);
+                $viewContent = implode(PHP_EOL, $elements);
+            }
 
             $view->setContent($viewContent)->saveWithMessages($this->messages);
 
@@ -164,39 +169,6 @@ class MenuPages
                 $view->deleteWithMessages($this->messages);
             }
         }
-
-        return $this;
-    }
-
-    /**
-     * Deletes all existing menu pages, their files and TW functions code chunks.
-     *
-     * @return ThemeWright\Sync\Theme\MenuPages
-     */
-    public function deleteAll()
-    {
-        $assets = array_merge(
-            $this->fs->getThemeFiles('assets/css'),
-            $this->fs->getThemeFiles('assets/scss'),
-            $this->fs->getThemeFiles('assets/js'),
-            $this->fs->getThemeFiles('assets/js/dist')
-        );
-
-        foreach ($assets as $asset) {
-            if (preg_match('/^[a-z0-9-]+\.menu-page\.(?:css|scss|js)$/', $asset->basename)) {
-                $asset->deleteWithMessages($this->messages);
-            }
-        }
-
-        $views = $this->fs->getThemeFiles('views/menu-pages');
-
-        foreach ($views as $view) {
-            if (preg_match('/^[a-z0-9-]+\.php$/', $view->basename)) {
-                $view->deleteWithMessages($this->messages);
-            }
-        }
-
-        $this->functions->deleteChunksByType('menu-page');
 
         return $this;
     }

@@ -14,6 +14,13 @@ class Element
     protected $node;
 
     /**
+     * The element type.
+     *
+     * @var string
+     */
+    protected $type;
+
+    /**
      * The condition PHP code.
      *
      * @var string[]
@@ -70,7 +77,7 @@ class Element
     public static $selfClosingTags = ['area', 'base', 'br', 'col', 'command', 'embed', 'hr', 'img', 'input', 'keygen', 'link', 'meta', 'param', 'source', 'track', 'wbr'];
 
     /**
-     * Handles a HTML view element and its properties.
+     * Handles a view element and its properties.
      *
      * @param  mixed  $args
      * @return void
@@ -79,6 +86,7 @@ class Element
     {
         $this->args = $args;
         $this->node = $args->node;
+        $this->type = $args->type;
         $this->condition = $this->formatArgsPhp('conditionGroupsPhp');
         $this->loop = $this->formatArgsPhp('loopPhp');
         $this->text = $this->formatArgsPhp('twsPhp');
@@ -191,12 +199,34 @@ class Element
     }
 
     /**
-     * Parses the element (classes, attributes, inner text and child elements).
+     * Parses the element based on its type.
      *
      * @param  int  $indent
      * @return string[]
      */
     protected function parseElement($indent = 0)
+    {
+        switch ($this->type) {
+            case 'html':
+                return $this->parseHtmlElement($indent);
+            case 'template':
+                return $this->parseTemplateElement($indent);
+            case 'part':
+                return []; // @todo
+            case 'text':
+                return $this->parseTextElement($indent);
+            default:
+                return [];
+        }
+    }
+
+    /**
+     * Parses the HTML element (classes, attributes, inner text and child elements).
+     *
+     * @param  int  $indent
+     * @return string[]
+     */
+    protected function parseHtmlElement($indent = 0)
     {
         $lines = [];
 
@@ -294,6 +324,62 @@ class Element
             }, $lines);
 
             $lines = [str_repeat("\t", $indent) . implode('', $lines)];
+        }
+
+        return $lines;
+    }
+
+    /**
+     * Parses the template element.
+     *
+     * @param  int  $indent
+     * @return string[]
+     */
+    protected function parseTemplateElement($indent = 0)
+    {
+        if ($this->node == 'header') {
+            $php = 'get_header()';
+        } else if (preg_match('/^header-([a-z0-9-]+)$/', $this->node, $match)) {
+            $php = "get_header( '{$match[1]}' )";
+        } else if ($this->node == 'footer') {
+            $php = 'get_footer()';
+        } else if (preg_match('/^footer-([a-z0-9-]+)$/', $this->node, $match)) {
+            $php = "get_footer( '{$match[1]}' )";
+        } else if ($this->node == 'sidebar') {
+            $php = 'get_sidebar()';
+        } else if (preg_match('/^sidebar-([a-z0-9-]+)$/', $this->node, $match)) {
+            $php = "get_sidebar( '{$match[1]}' )";
+        } else if ($this->node == 'searchform') {
+            $php = "get_search_form()";
+        } else {
+            $php = '';
+        }
+
+        return [
+            str_repeat("\t", $indent) . '<?php ' . $php . '; ?' . '>',
+        ];
+    }
+
+    /**
+     * Parses the text element.
+     *
+     * @param  int  $indent
+     * @return string[]
+     */
+    protected function parseTextElement($indent = 0)
+    {
+        $lines = [];
+
+        if (count($this->text) > 1) {
+            $lines[] = str_repeat("\t", $indent) . '<?php';
+
+            foreach ($this->text as $textLine) {
+                $lines[] = str_repeat("\t", $indent + 1) . $textLine;
+            }
+
+            $lines[] = str_repeat("\t", $indent) . '?' . '>';
+        } else if ($this->text) {
+            $lines[] = str_repeat("\t", $indent) . '<?php ' . $this->text[0] . ' ?' . '>';
         }
 
         return $lines;

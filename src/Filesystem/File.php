@@ -56,7 +56,7 @@ class File
     public function __construct(string $path, string $pathInTheme = '')
     {
         $this->path = $path;
-        $this->pathInTheme = $pathInTheme;
+        $this->pathInTheme = trim($pathInTheme, '/');
         $this->dir = dirname($path);
         $this->basename = basename($path);
         $this->initialContent = $this->getContent();
@@ -135,6 +135,17 @@ class File
             $this->newContent = (new File($templatePath))->getContent();
         }
 
+        return $this;
+    }
+
+    /**
+     * Converts the indents from double spaces to tabs.
+     *
+     * @return \ThemeWright\Sync\Filesystem\File
+     */
+    public function doubleSpacesToTabs()
+    {
+        $this->newContent = preg_replace('/^ {2}|\G {2}/Sm', "\t", $this->newContent);
         return $this;
     }
 

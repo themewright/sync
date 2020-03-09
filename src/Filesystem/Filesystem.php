@@ -136,7 +136,7 @@ class Filesystem
      * @param  string  $subdir
      * @return \ThemeWright\Sync\Filesystem\File[]
      */
-    public function getThemeFiles(string $subdir)
+    public function getThemeFiles(string $subdir = '')
     {
         $files = [];
         $filenames = static::listFiles($this->themeDir . '/' . $subdir);

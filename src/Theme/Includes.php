@@ -36,7 +36,7 @@ class Includes
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, \ThemeWright\Sync\Theme\Functions &$functions, &$messages = [])
+    public function __construct(string $themeDir, &$functions, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->functions = &$functions;
