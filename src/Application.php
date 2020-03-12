@@ -12,6 +12,9 @@ use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
 use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
+use ThemeWright\Sync\Theme\Parts;
+use ThemeWright\Sync\Theme\Scripts;
+use ThemeWright\Sync\Theme\Styles;
 use ThemeWright\Sync\Theme\Stylesheet;
 use ThemeWright\Sync\Theme\StylesScss;
 use ThemeWright\Sync\Theme\Templates;
@@ -95,6 +98,9 @@ class Application
             (new Bundlers($themeDir, $data, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
+            (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
+            (new Styles($themeDir, $data, $functions))->build();
+            (new Scripts($themeDir, $data, $functions))->build();
             $functions->build();
             $stylesScss->build();
             $mainJs->build();
@@ -103,7 +109,6 @@ class Application
             // Doing partially only when 1 commit difference
             switch ($action) {
                 case 'menu-page':
-                    (new Bundlers($themeDir, $data, $messages))->build();
                     (new MenuPages($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
@@ -113,8 +118,24 @@ class Application
                     $stylesheet->build($time);
                     break;
                 case 'template':
-                    (new Bundlers($themeDir, $data, $messages))->build();
                     (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    $functions->build();
+                    $stylesScss->build();
+                    $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'style':
+                    (new Styles($themeDir, $data, $functions))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'script':
+                    (new Scripts($themeDir, $data, $functions))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'part':
+                    (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
                     $functions->build();
                     $stylesScss->build();
                     $mainJs->build();

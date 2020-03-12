@@ -57,7 +57,7 @@ class Includes
         $chunk = [
             'type' => 'includes',
             'code' => [
-                '// Include the ThemeWright classes',
+                '// Include the ThemeWright files',
             ],
         ];
 

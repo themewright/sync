@@ -174,6 +174,15 @@ class Functions
                     case 'template':
                         $pattern = '/\/\/ Template specific options: [a-z0-9-]+\.php \(#([0-9]+)\)/';
                         break;
+                    case 'style':
+                        $pattern = '/\/\/ Enqueue CSS stylesheet: [a-z0-9-]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'script':
+                        $pattern = '/\/\/ Enqueue script: [a-z0-9-]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'part':
+                        $pattern = '/\/\/ Template part specific options: [a-z0-9-]+\.php \(#([0-9]+)\)/';
+                        break;
                     default:
                         $pattern = null;
                         break;
@@ -201,12 +210,18 @@ class Functions
      */
     protected function identifyChunkType(string $code)
     {
-        if (strpos($code, '// Include the ThemeWright classes') === 0) {
+        if (strpos($code, '// Include the ThemeWright files') === 0) {
             return 'includes';
         } else if (strpos($code, '// Register a new menu page') === 0) {
             return 'menu-page';
         } else if (strpos($code, '// Template specific options') === 0) {
             return 'template';
+        } else if (strpos($code, '// Enqueue CSS stylesheet') === 0) {
+            return 'style';
+        } else if (strpos($code, '// Enqueue script') === 0) {
+            return 'script';
+        } else if (strpos($code, '// Template part specific options') === 0) {
+            return 'part';
         } else {
             return false;
         }
