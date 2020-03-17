@@ -2,8 +2,8 @@
 
 namespace ThemeWright\Sync\Theme;
 
+use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Filesystem\Filesystem;
-use ThemeWright\Sync\View\Element;
 
 class Parts
 {
@@ -84,13 +84,13 @@ class Parts
             if ($oldChunk) {
                 preg_match('/\/\/ Template part specific options: ([a-z0-9-]+)\.php \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
 
-                // Delete old files if the menu slug changed
+                // Delete old files if the part name changed
                 if ($oldNameMatch && $oldNameMatch[1] != $part->name) {
                     $this->deleteFiles($oldNameMatch[1]);
                 }
             }
 
-            $file = $this->fs->file('parts/' . $part->name . '.php');
+            $file = $this->fs->file('views/parts/' . $part->name . '.php');
             $scss = $this->fs->file('assets/scss/parts/_' . $part->name . '.scss');
             $js = $this->fs->file('assets/js/parts/' . $part->name . '.js');
 
@@ -157,32 +157,28 @@ class Parts
      *
      * This method does not delete TW functions, styles.scss and main.js code chunks.
      *
-     * @param string $name
+     * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
      */
     public function deleteFiles(string $name)
     {
-        $this->fs->file('parts/' . $name . '.php')->deleteWithMessages($this->messages);
+        $this->fs->file('views/parts/' . $name . '.php')->deleteWithMessages($this->messages);
         $this->fs->file('assets/scss/parts/_' . $name . '.scss')->deleteWithMessages($this->messages);
         $this->fs->file('assets/js/parts/' . $name . '.js')->deleteWithMessages($this->messages);
 
         return $this;
     }
 
-/**
- * Deletes template parts and associated files which are not included in the current $data object.
- *
- * This method does not delete TW functions, styles.scss and main.js code chunks.
- *
- * @return ThemeWright\Sync\Theme\Parts
- */
+    /**
+     * Deletes template parts and associated files which are not included in the current $data object.
+     *
+     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     *
+     * @return ThemeWright\Sync\Theme\Parts
+     */
     public function deleteExceptData()
     {
         $names = array_column($this->data->parts, 'name');
-
-// Don't delete the functions files
-        $names[] = 'functions';
-        $names[] = 'tw-functions';
 
         $assets = array_merge(
             $this->fs->getThemeFiles('assets/scss/parts'),
@@ -197,7 +193,7 @@ class Parts
             }
         }
 
-        $files = $this->fs->getThemeFiles('parts');
+        $files = $this->fs->getThemeFiles('views/parts');
 
         foreach ($files as $file) {
             preg_match('/^([a-z0-9-]+)\.php$/', $file->basename, $partMatch);
@@ -210,12 +206,12 @@ class Parts
         return $this;
     }
 
-/**
- * Creates a TW functions code chunk for a template part object.
- *
- * @param mixed $part
- * @return array
- */
+    /**
+     * Creates a TW functions code chunk for a template part object.
+     *
+     * @param mixed $part
+     * @return array
+     */
     protected function createChunk($part)
     {
         $chunk = [

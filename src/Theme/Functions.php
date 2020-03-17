@@ -168,6 +168,9 @@ class Functions
         foreach ($this->chunks as $index => $_chunk) {
             if ($_chunk['type'] === $chunk['type']) {
                 switch ($chunk['type']) {
+                    case 'block':
+                        $pattern = '/\/\/ Include block: [a-z0-9-]+ \(#([0-9]+)\)/';
+                        break;
                     case 'menu-page':
                         $pattern = '/\/\/ Register a new menu page \(#([0-9]+)\)/';
                         break;
@@ -212,6 +215,8 @@ class Functions
     {
         if (strpos($code, '// Include the ThemeWright files') === 0) {
             return 'includes';
+        } else if (strpos($code, '// Include block') === 0) {
+            return 'block';
         } else if (strpos($code, '// Register a new menu page') === 0) {
             return 'menu-page';
         } else if (strpos($code, '// Template specific options') === 0) {

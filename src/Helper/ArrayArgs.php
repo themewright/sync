@@ -26,7 +26,7 @@ class ArrayArgs
      *
      * @param  string  $key
      * @param  mixed  $value
-     * @return void
+     * @return ThemeWright\Sync\Helper\ArrayArgs
      */
     public function add(string $key, $value)
     {
@@ -50,6 +50,19 @@ class ArrayArgs
             'key' => $key,
             'value' => $value,
         ];
+
+        return $this;
+    }
+
+    /**
+     * Sort the array arguments and maintain index association.
+     *
+     * @return ThemeWright\Sync\Helper\ArrayArgs
+     */
+    public function asort()
+    {
+        asort($this->args);
+        return $this;
     }
 
     /**
@@ -62,8 +75,8 @@ class ArrayArgs
     {
         $out = [];
 
-        foreach ($this->args as $i => $arg) {
-            $out[] = str_repeat("\t", $indent) . "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . ' => ' . $arg->value . (($i < count($this->args) - 1) ? ',' : '');
+        foreach ($this->args as $arg) {
+            $out[] = str_repeat("\t", $indent) . "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => {$arg->value},";
         }
 
         return $out;

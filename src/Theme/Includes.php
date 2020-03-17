@@ -82,7 +82,7 @@ class Includes
         foreach ($files as $file) {
             $content = $file['source']->getContent();
             $file['destination']->setContent($content)->saveWithMessages($this->messages);
-            $chunk['code'][] = "include get_stylesheet_directory() . '/{$file['destination']->pathInTheme}';";
+            $chunk['code'][] = "include get_template_directory() . '/{$file['destination']->pathInTheme}';";
         }
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);

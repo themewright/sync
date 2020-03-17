@@ -2,8 +2,8 @@
 
 namespace ThemeWright\Sync\Theme;
 
+use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Filesystem\Filesystem;
-use ThemeWright\Sync\View\Element;
 
 class Templates
 {
@@ -84,15 +84,24 @@ class Templates
             if ($oldChunk) {
                 preg_match('/\/\/ Template specific options: ([a-z0-9-]+)\.php \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
 
-                // Delete old files if the menu slug changed
+                // Delete old files if the template name changed
                 if ($oldNameMatch && $oldNameMatch[1] != $template->name) {
                     $this->deleteFiles($oldNameMatch[1]);
                 }
             }
 
-            $file = $this->fs->file($template->name . '.php');
+            $fields = $this->fs->file('includes/templates/fields-' . $template->name . '.php');
+            $view = $this->fs->file($template->name . '.php');
             $scss = $this->fs->file('assets/scss/templates/_' . $template->name . '.scss');
             $js = $this->fs->file('assets/js/templates/' . $template->name . '.js');
+
+            if ($template->type == 'template' && $template->fields) {
+                $fieldsContent = '<?php';
+
+                $fields->setContent($fieldsContent)->saveWithMessages($this->messages);
+            } else {
+                $fields->deleteWithMessages($this->messages);
+            }
 
             if ($template->scss) {
                 $scss->setContent($template->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
@@ -111,16 +120,20 @@ class Templates
             }
 
             if ($template->viewRaw) {
-                $fileContent = $template->viewRaw;
+                $viewContent = $template->viewRaw;
             } else {
                 $elements = array_map(function ($args) {
                     return (new Element($args))->parse();
                 }, $template->view);
 
-                $fileContent = implode(PHP_EOL, $elements);
+                $viewContent = implode(PHP_EOL, $elements);
             }
 
-            $file->setContent($fileContent)->saveWithMessages($this->messages);
+            if ($template->type == 'template') {
+                $viewContent = '<?php // Template name: ' . $template->name . ' ?' . '>' . PHP_EOL . $viewContent;
+            }
+
+            $view->setContent($viewContent)->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
@@ -136,6 +149,7 @@ class Templates
      */
     public function deleteFiles(string $name)
     {
+        $this->fs->file('includes/templates/fields-' . $name . '.php')->deleteWithMessages($this->messages);
         $this->fs->file($name . '.php')->deleteWithMessages($this->messages);
         $this->fs->file('assets/scss/templates/_' . $name . '.scss')->deleteWithMessages($this->messages);
         $this->fs->file('assets/js/templates/' . $name . '.js')->deleteWithMessages($this->messages);
@@ -158,6 +172,16 @@ class Templates
         $names[] = 'functions';
         $names[] = 'tw-functions';
 
+        $fields = $this->fs->getThemeFiles('includes/templates');
+
+        foreach ($fields as $field) {
+            preg_match('/^fields-([a-z0-9-]+)\.php$/', $field->basename, $templateMatch);
+
+            if ($templateMatch && !in_array($templateMatch[1], $names)) {
+                $field->deleteWithMessages($this->messages);
+            }
+        }
+
         $assets = array_merge(
             $this->fs->getThemeFiles('assets/scss/templates'),
             $this->fs->getThemeFiles('assets/js/templates')
@@ -171,13 +195,13 @@ class Templates
             }
         }
 
-        $files = $this->fs->getThemeFiles();
+        $views = $this->fs->getThemeFiles();
 
-        foreach ($files as $file) {
-            preg_match('/^([a-z0-9-]+)\.php$/', $file->basename, $templateMatch);
+        foreach ($views as $view) {
+            preg_match('/^([a-z0-9-]+)\.php$/', $view->basename, $templateMatch);
 
             if ($templateMatch && !in_array($templateMatch[1], $names)) {
-                $file->deleteWithMessages($this->messages);
+                $view->deleteWithMessages($this->messages);
             }
         }
 
@@ -199,8 +223,8 @@ class Templates
             ],
         ];
 
-        if ($template->type == 'template') {
-            // @todo
+        if ($template->type == 'template' && $template->fields) {
+            $chunk['code'][] = "include get_template_directory() . '/includes/templates/fields-{$template->name}.php';";
         }
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);

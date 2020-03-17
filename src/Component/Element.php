@@ -1,6 +1,6 @@
 <?php
 
-namespace ThemeWright\Sync\View;
+namespace ThemeWright\Sync\Component;
 
 use ThemeWright\Sync\Helper\Str;
 
@@ -58,7 +58,7 @@ class Element
     /**
      * The child elements array.
      *
-     * @var \ThemeWright\Sync\View\Element[]
+     * @var \ThemeWright\Sync\Component\Element[]
      */
     protected $children;
 
@@ -246,9 +246,9 @@ class Element
                     }
                 }
 
-                $classesAttr = ' classes="' . implode(' ', $classesAttr) . '"';
+                $classesAttr = ' class="' . implode(' ', $classesAttr) . '"';
             } else {
-                $classesAttr = ' classes="<?php echo implode( \' \', $classes ); ?' . '>"';
+                $classesAttr = ' class="<?php echo implode( \' \', $classes ); ?' . '>"';
 
                 $lines[] = str_repeat("\t", $indent) . '<?php';
 

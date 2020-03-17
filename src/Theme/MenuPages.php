@@ -2,9 +2,9 @@
 
 namespace ThemeWright\Sync\Theme;
 
+use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Filesystem\Filesystem;
 use ThemeWright\Sync\Helper\ArrayArgs;
-use ThemeWright\Sync\View\Element;
 
 class MenuPages
 {

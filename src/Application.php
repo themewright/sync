@@ -7,6 +7,7 @@ use ThemeWright\Sync\Filesystem\Filesystem;
 use ThemeWright\Sync\Helper\Str;
 use ThemeWright\Sync\Http\Request;
 use ThemeWright\Sync\Http\Response;
+use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\Bundlers;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
@@ -96,6 +97,7 @@ class Application
             $mainJs->emptyModules();
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
+            (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
@@ -108,6 +110,13 @@ class Application
         } else if ($commit - 1 == $stylesheet->get('commit')) {
             // Doing partially only when 1 commit difference
             switch ($action) {
+                case 'block':
+                    (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    $functions->build();
+                    $stylesScss->build();
+                    $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
                 case 'menu-page':
                     (new MenuPages($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
