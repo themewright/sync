@@ -119,8 +119,8 @@ class Blocks
             if ($block->viewRaw) {
                 $viewContent = $block->viewRaw;
             } else {
-                $elements = array_map(function ($args) {
-                    return (new Element($args))->parse();
+                $elements = array_map(function ($args) use ($block) {
+                    return (new Element($args, $block->templates, $block->parts))->parse();
                 }, $block->view);
 
                 $viewContent = implode(PHP_EOL, $elements);
@@ -147,40 +147,48 @@ class Blocks
             "",
             "namespace ThemeWright\\Blocks;",
             "",
+            "/**",
+            " * Handles the {$block->name} block.",
+            " */",
             "class {$classname} {",
             "\t/**",
-            "\t * Handles the {$block->name} block.",
-            "\t *",
-            "\t * @return void",
+            "\t * Class constructor.",
             "\t */",
-            "\tpublic function __construct() {",
-            "\t\tadd_action( 'acf/init', array( \$this, 'register_fields' ) );",
-            "\t}",
-            "",
-            "\t/**",
-            "\t * Registers the ACF fields.",
-            "\t *",
-            "\t * @return void",
-            "\t */",
-            "\tpublic function register_fields() {",
-            "\t\tacf_add_local_field_group(",
-            "\t\t\tarray(",
-            "\t\t\t\t'key' => 'group_block_{$block->id}',",
-            "\t\t\t\t'fields' => array(",
         ];
 
-        foreach ($block->fields as $field) {
-            if ($field->type == 'field_group') {
-                // @todo get fields from the group
-            } else {
-                $php[] = (new Field($field))->build(5, "field_block_{$block->id}_");
+        if ($block->fields) {
+            $php[] = "\tpublic function __construct() {";
+            $php[] = "\t\tadd_action( 'acf/init', array( \$this, 'register_fields' ) );";
+            $php[] = "\t}";
+            $php[] = "";
+            $php[] = "\t/**";
+            $php[] = "\t * Registers the ACF fields.";
+            $php[] = "\t *";
+            $php[] = "\t * @return void";
+            $php[] = "\t */";
+            $php[] = "\tpublic function register_fields() {";
+            $php[] = "\t\tacf_add_local_field_group(";
+            $php[] = "\t\t\tarray(";
+            $php[] = "\t\t\t\t'key'    => 'group_block_{$block->id}',";
+            $php[] = "\t\t\t\t'title'  => '{$block->name}',";
+            $php[] = "\t\t\t\t'fields' => array(";
+
+            foreach ($block->fields as $field) {
+                if ($field->type == 'field_group') {
+                    // @todo get fields from the group
+                } else {
+                    $php[] = (new Field($field))->build(5, "field_block_{$block->id}_");
+                }
             }
+
+            $php[] = "\t\t\t\t),";
+            $php[] = "\t\t\t)";
+            $php[] = "\t\t);";
+            $php[] = "\t}";
+        } else {
+            $php[] = "\tpublic function __construct() { }";
         }
 
-        $php[] = "\t\t\t\t),";
-        $php[] = "\t\t\t)";
-        $php[] = "\t\t);";
-        $php[] = "\t}";
         $php[] = "}";
 
         return implode(PHP_EOL, $php);

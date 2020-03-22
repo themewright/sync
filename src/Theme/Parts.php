@@ -113,43 +113,17 @@ class Parts
             if ($part->viewRaw) {
                 $fileContent = $part->viewRaw;
             } else {
-                $elements = array_map(function ($args) {
-                    return (new Element($args))->parse();
+                $elements = array_map(function ($args) use ($part) {
+                    return (new Element($args, $part->templates, $part->parts))->parse();
                 }, $part->view);
 
                 $fileContent = implode(PHP_EOL, $elements);
             }
 
-            $fileContent = $this->buildArgs($part->args) . PHP_EOL . $fileContent;
-
             $file->setContent($fileContent)->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
-    }
-
-    /**
-     * Builds the template part arguments code.
-     *
-     * @param  array  $args
-     * @return string
-     */
-    protected function buildArgs(array $args)
-    {
-        $php = [];
-
-        if ($args) {
-            $php[] = '<?php';
-
-            foreach ($args as $arg) {
-                $default = $arg->default ?: 'null';
-                $php[] = "\t{$arg->name} = {$arg->name} ?? {$default};";
-            }
-
-            $php[] = '?' . '>';
-        }
-
-        return implode(PHP_EOL, $php);
     }
 
     /**
@@ -220,6 +194,20 @@ class Parts
                 "// Template part specific options: {$part->name}.php (#{$part->id})",
             ],
         ];
+
+        if ($part->args) {
+            $chunk['code'][] = "TW_Part::register( '{$part->name}', array(";
+
+            foreach ($part->args as $arg) {
+                $name = ltrim($arg->name, '$');
+                $default = $arg->default ?: 'null';
+                $chunk['code'][] = "\t'{$name}' => {$default},";
+            }
+
+            $chunk['code'][] = ") );";
+        } else {
+            $chunk['code'][] = "TW_Part::register( '{$part->name}' );";
+        }
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);
 

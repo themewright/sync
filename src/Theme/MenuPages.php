@@ -187,7 +187,7 @@ class MenuPages
             'type' => 'menu-page',
             'code' => [
                 "// Register a new menu page (#{$menuPage->id})",
-                "new TW_Menu_Page( (object) array(",
+                "new TW_Menu_Page( array(",
             ],
         ];
 

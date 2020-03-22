@@ -3,6 +3,7 @@
 namespace ThemeWright\Sync\Theme;
 
 use ThemeWright\Sync\Component\Element;
+use ThemeWright\Sync\Component\FieldGroup;
 use ThemeWright\Sync\Filesystem\Filesystem;
 
 class Templates
@@ -96,8 +97,23 @@ class Templates
             $js = $this->fs->file('assets/js/templates/' . $template->name . '.js');
 
             if ($template->type == 'template' && $template->fields) {
-                $fieldsContent = '<?php';
+                $fieldGroup = new FieldGroup([
+                    'fields' => $template->fields,
+                    'id' => "template_{$template->id}",
+                    'title' => '@todo',
+                    'location' => [
+                        [
+                            [
+                                'param' => 'page_template',
+                                'operator' => '==',
+                                'value' => $template->name . '.php',
+                            ],
+                        ],
+                    ],
+                    'label_placement' => 'left',
+                ]);
 
+                $fieldsContent = '<?php' . PHP_EOL . $fieldGroup->build();
                 $fields->setContent($fieldsContent)->saveWithMessages($this->messages);
             } else {
                 $fields->deleteWithMessages($this->messages);
@@ -122,15 +138,15 @@ class Templates
             if ($template->viewRaw) {
                 $viewContent = $template->viewRaw;
             } else {
-                $elements = array_map(function ($args) {
-                    return (new Element($args))->parse();
+                $elements = array_map(function ($args) use ($template) {
+                    return (new Element($args, $template->templates, $template->parts, $template->blockGroups))->parse();
                 }, $template->view);
 
                 $viewContent = implode(PHP_EOL, $elements);
             }
 
             if ($template->type == 'template') {
-                $viewContent = '<?php // Template name: ' . $template->name . ' ?' . '>' . PHP_EOL . $viewContent;
+                $viewContent = "<?php /* Template name: {$template->name} */ ?" . ">" . PHP_EOL . $viewContent;
             }
 
             $view->setContent($viewContent)->saveWithMessages($this->messages);

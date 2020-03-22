@@ -168,6 +168,15 @@ class Functions
         foreach ($this->chunks as $index => $_chunk) {
             if ($_chunk['type'] === $chunk['type']) {
                 switch ($chunk['type']) {
+                    case 'constants':
+                        $pattern = '/(\/\/ Define constants)/';
+                        break;
+                    case 'includes':
+                        $pattern = '/(\/\/ Include the ThemeWright files)/';
+                        break;
+                    case 'globals':
+                        $pattern = '/(\/\/ Define global variables)/';
+                        break;
                     case 'block':
                         $pattern = '/\/\/ Include block: [a-z0-9-]+ \(#([0-9]+)\)/';
                         break;
@@ -213,8 +222,12 @@ class Functions
      */
     protected function identifyChunkType(string $code)
     {
-        if (strpos($code, '// Include the ThemeWright files') === 0) {
+        if (strpos($code, '// Define constants') === 0) {
+            return 'constants';
+        } else if (strpos($code, '// Include the ThemeWright files') === 0) {
             return 'includes';
+        } else if (strpos($code, '// Define global variables') === 0) {
+            return 'globals';
         } else if (strpos($code, '// Include block') === 0) {
             return 'block';
         } else if (strpos($code, '// Register a new menu page') === 0) {
@@ -238,7 +251,21 @@ class Functions
      * @return void
      */
     protected function sortChunks()
-    {}
+    {
+        usort($this->chunks, function ($a, $b) {
+            $order = ['constants', 'includes', 'globals'];
+
+            foreach ($order as $type) {
+                if ($a['type'] == $type) {
+                    return -1;
+                } else if ($b['type'] == $type) {
+                    return 1;
+                }
+            }
+
+            return 0;
+        });
+    }
 
     /**
      * Creates new or updates existing (tw-)functions.php files.
@@ -247,6 +274,18 @@ class Functions
      */
     public function build()
     {
+        $constantsChunk = [
+            'type' => 'constants',
+            'code' => "// Define constants" . PHP_EOL . "define( 'TW_DOMAIN', '{$this->data->domain}' );",
+        ];
+
+        $globalsChunk = [
+            'type' => 'globals',
+            'code' => "// Define global variables" . PHP_EOL . "\$postmeta = new TW_Fields();" . PHP_EOL . "\$field = new TW_Fields( 'post' );" . PHP_EOL . "\$option = new TW_Fields( 'option' );",
+        ];
+
+        $this->updateChunk($constantsChunk);
+        $this->updateChunk($globalsChunk);
         $this->sortChunks();
         $this->buildWpFile();
         $this->buildTwFile();
@@ -271,11 +310,7 @@ class Functions
      */
     protected function buildTwFile()
     {
-        $content = [
-            '<?php',
-            '',
-            "define( 'TW_DOMAIN', '{$this->data->domain}' ); ",
-        ];
+        $content = ['<?php'];
 
         foreach ($this->chunks as $chunk) {
             $content[] = PHP_EOL . $chunk['code'];

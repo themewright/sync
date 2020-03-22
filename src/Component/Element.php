@@ -21,6 +21,13 @@ class Element
     protected $type;
 
     /**
+     * The foreign key of a related template, part or block group.
+     *
+     * @var int
+     */
+    protected $foreignKey;
+
+    /**
      * The condition PHP code.
      *
      * @var string[]
@@ -33,6 +40,13 @@ class Element
      * @var string[]
      */
     protected $loop;
+
+    /**
+     * The part arguments code.
+     *
+     * @var string[]
+     */
+    protected $partArgs;
 
     /**
      * The inner text content of the element (mixed HTML and PHP).
@@ -70,6 +84,27 @@ class Element
     protected $args;
 
     /**
+     * The related templates.
+     *
+     * @var mixed
+     */
+    protected $relatedTemplates;
+
+    /**
+     * The related parts.
+     *
+     * @var mixed
+     */
+    protected $relatedParts;
+
+    /**
+     * The related block groups.
+     *
+     * @var mixed
+     */
+    protected $relatedBlockGroups;
+
+    /**
      * A list of self-closing HTML tags.
      *
      * @var array
@@ -80,21 +115,30 @@ class Element
      * Handles a view element and its properties.
      *
      * @param  mixed  $args
+     * @param  array  $relatedTemplates
+     * @param  array  $relatedParts
+     * @param  array  $relatedBlockGroups
      * @return void
      */
-    public function __construct($args)
+    public function __construct($args, $relatedTemplates = [], $relatedParts = [], $relatedBlockGroups = [])
     {
         $this->args = $args;
         $this->node = $args->node;
         $this->type = $args->type;
+        $this->foreignKey = $args->foreignKey ?? null;
         $this->condition = $this->formatArgsPhp('conditionGroupsPhp');
         $this->loop = $this->formatArgsPhp('loopPhp');
+        $this->partArgs = $this->formatArgsPhp('partArgsPhp');
         $this->text = $this->formatArgsPhp('twsPhp');
         $this->classes = $this->formatArgsPhp('cssClassesPhp');
         $this->attributes = $this->formatArgsPhp('attributesPhp');
 
+        $this->relatedTemplates = $relatedTemplates;
+        $this->relatedParts = $relatedParts;
+        $this->relatedBlockGroups = $relatedBlockGroups;
+
         $this->children = array_map(function ($args) {
-            return new Element($args);
+            return new Element($args, $this->relatedTemplates, $this->relatedParts, $this->relatedBlockGroups);
         }, $args->children);
     }
 
@@ -212,7 +256,9 @@ class Element
             case 'template':
                 return $this->parseTemplateElement($indent);
             case 'part':
-                return []; // @todo
+                return $this->parsePartElement($indent);
+            case 'blockGroup':
+                return $this->parseBlockGroupElement($indent);
             case 'text':
                 return $this->parseTextElement($indent);
             default:
@@ -358,6 +404,69 @@ class Element
         return [
             str_repeat("\t", $indent) . '<?php ' . $php . '; ?' . '>',
         ];
+    }
+
+    /**
+     * Parses the part element.
+     *
+     * @param  int  $indent
+     * @return string[]
+     */
+    protected function parsePartElement($indent = 0)
+    {
+        $i = array_search($this->foreignKey, array_column($this->relatedParts, 'id'));
+
+        if ($i === false) {
+            return [];
+        }
+
+        $filename = $this->relatedParts[$i]->name;
+
+        if ($this->partArgs) {
+            $php = [str_repeat("\t", $indent) . '<?php'];
+
+            foreach ($this->partArgs as $row) {
+                $php[] = str_repeat("\t", $indent + 1) . $row;
+            }
+
+            $php[] = str_repeat("\t", $indent + 1) . "TW_Part::render( '{$filename}', \$args );";
+            $php[] = str_repeat("\t", $indent) . '?' . '>';
+        } else {
+            $php[] = str_repeat("\t", $indent) . "<?php TW_Part::render( '{$filename}' ); ?" . '>';
+        }
+
+        return $php;
+    }
+
+    /**
+     * Parses the block group element.
+     *
+     * @param  int  $indent
+     * @return string[]
+     */
+    protected function parseBlockGroupElement($indent = 0)
+    {
+        // if ($this->node == 'header') {
+        //     $php = 'get_header()';
+        // } else if (preg_match('/^header-([a-z0-9-]+)$/', $this->node, $match)) {
+        //     $php = "get_header( '{$match[1]}' )";
+        // } else if ($this->node == 'footer') {
+        //     $php = 'get_footer()';
+        // } else if (preg_match('/^footer-([a-z0-9-]+)$/', $this->node, $match)) {
+        //     $php = "get_footer( '{$match[1]}' )";
+        // } else if ($this->node == 'sidebar') {
+        //     $php = 'get_sidebar()';
+        // } else if (preg_match('/^sidebar-([a-z0-9-]+)$/', $this->node, $match)) {
+        //     $php = "get_sidebar( '{$match[1]}' )";
+        // } else if ($this->node == 'searchform') {
+        //     $php = "get_search_form()";
+        // } else {
+        //     $php = '';
+        // }
+
+        // return [
+        //     str_repeat("\t", $indent) . '<?php ' . $php . '; ?' . '>',
+        // ];
     }
 
     /**

@@ -79,18 +79,18 @@ class TW_Menu_Page {
 	/**
 	 * Class constructor.
 	 *
-	 * @param  object  $data
+	 * @param  array  $data
 	 */
-	public function __construct( object $data ) {
-		$this->page_title  = $data->page_title;
-		$this->menu_title  = $data->menu_title;
-		$this->capability  = $data->capability;
-		$this->menu_slug   = $data->menu_slug;
-		$this->parent_slug = $data->parent_slug ?? null;
-		$this->icon_url    = $data->icon_url ?? '';
-		$this->position    = $data->position ?? null;
-		$this->scss        = $data->scss;
-		$this->js          = $data->js;
+	public function __construct( array $data ) {
+		$this->page_title  = $data['page_title'];
+		$this->menu_title  = $data['menu_title'];
+		$this->capability  = $data['capability'];
+		$this->menu_slug   = $data['menu_slug'];
+		$this->parent_slug = $data['parent_slug'] ?? null;
+		$this->icon_url    = $data['icon_url'] ?? '';
+		$this->position    = $data['position'] ?? null;
+		$this->scss        = $data['scss'];
+		$this->js          = $data['js'];
 
 		add_action( 'admin_menu', array( $this, 'on_admin_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'on_admin_enqueue_scripts' ) );

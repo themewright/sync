@@ -15,7 +15,7 @@ class Field
     protected $args;
 
     /**
-     * Handles the ACF field groups.
+     * Handles an ACF field.
      *
      * @param  mixed  $args
      * @return void
@@ -30,9 +30,10 @@ class Field
      *
      * @param  int  $indent
      * @param  string  $keyPrefix
+     * @param  string  $return
      * @return string
      */
-    public function build(int $indent = 0, $keyPrefix = 'field_')
+    public function build(int $indent = 0, $keyPrefix = 'field_', $return = 'string')
     {
         $args = new ArrayArgs();
 
@@ -48,6 +49,12 @@ class Field
             str_repeat("\t", $indent) . "),",
         ];
 
-        return implode(PHP_EOL, $lines);
+        if ($return == 'array') {
+            return $lines;
+        } else if ($return == 'ArrayArgs') {
+            return $args;
+        } else {
+            return implode(PHP_EOL, $lines);
+        }
     }
 }

@@ -2,9 +2,6 @@
 
 namespace ThemeWright\Sync\Helper;
 
-/**
- * Helper for building formatted array arguments.
- */
 class ArrayArgs
 {
     /**
@@ -12,7 +9,7 @@ class ArrayArgs
      *
      * @var object
      */
-    private $args;
+    private $args = [];
 
     /**
      * The character count of the longest key of all arguments.
@@ -20,6 +17,20 @@ class ArrayArgs
      * @var integer
      */
     private $maxKeyChars = 0;
+
+    /**
+     * Helper for building formatted array arguments.
+     *
+     * @param  array  $array
+     * @return void
+     */
+    public function __construct($array = [])
+    {
+        foreach ($array as $key => $value) {
+            $key = is_string($key) ? $key : '';
+            $this->add($key, $value);
+        }
+    }
 
     /**
      * Adds an array argument.
@@ -39,7 +50,7 @@ class ArrayArgs
         } else if (is_string($value)) {
             $value = "'{$value}'";
         } else if (is_array($value)) {
-            // @todo
+            $value = new ArrayArgs($value);
         }
 
         if (strlen($key) > $this->maxKeyChars) {
@@ -52,6 +63,16 @@ class ArrayArgs
         ];
 
         return $this;
+    }
+
+    /**
+     * Checks if the $args array is empty.
+     *
+     * @return boolean
+     */
+    public function isEmpty()
+    {
+        return empty($this->args);
     }
 
     /**
@@ -76,7 +97,15 @@ class ArrayArgs
         $out = [];
 
         foreach ($this->args as $arg) {
-            $out[] = str_repeat("\t", $indent) . "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => {$arg->value},";
+            $key = $arg->key ? "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
+
+            if ($arg->value instanceof ArrayArgs) {
+                $out[] = str_repeat("\t", $indent) . $key . "array(";
+                $out = array_merge($out, $arg->value->format($indent + 1));
+                $out[] = str_repeat("\t", $indent) . '),';
+            } else {
+                $out[] = str_repeat("\t", $indent) . $key . "{$arg->value},";
+            }
         }
 
         return $out;
