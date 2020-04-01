@@ -35,7 +35,7 @@ class Scripts
      * @param  \ThemeWright\Sync\Theme\Functions  $functions
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$functions)
+    public function __construct(string $themeDir, &$data, &$functions)
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;

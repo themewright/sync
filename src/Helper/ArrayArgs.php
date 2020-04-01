@@ -22,12 +22,16 @@ class ArrayArgs
      * Helper for building formatted array arguments.
      *
      * @param  array  $array
+     * @param  bool  $allKeys
      * @return void
      */
-    public function __construct($array = [])
+    public function __construct($array = [], $allKeys = false)
     {
         foreach ($array as $key => $value) {
-            $key = is_string($key) ? $key : '';
+            if (!$allKeys) {
+                $key = is_string($key) ? $key : '';
+            }
+
             $this->add($key, $value);
         }
     }
@@ -50,17 +54,34 @@ class ArrayArgs
         } else if (is_string($value)) {
             $value = "'{$value}'";
         } else if (is_array($value)) {
-            $value = new ArrayArgs($value);
+            $value = new ArrayArgs($value, true);
+        } else if (is_object($value) && !is_a($value, 'ThemeWright\Sync\Helper\ArrayArgs')) {
+            $value = new ArrayArgs((array) $value, true);
         }
 
         if (strlen($key) > $this->maxKeyChars) {
             $this->maxKeyChars = strlen($key);
         }
 
-        $this->args[] = (object) [
+        $this->args[$key] = (object) [
             'key' => $key,
             'value' => $value,
         ];
+
+        return $this;
+    }
+
+    /**
+     * Removes an array argument.
+     *
+     * @param  string  $key
+     * @return ThemeWright\Sync\Helper\ArrayArgs
+     */
+    public function remove(string $key)
+    {
+        if (isset($this->args[$key])) {
+            unset($this->args[$key]);
+        }
 
         return $this;
     }
@@ -103,7 +124,7 @@ class ArrayArgs
                 $out[] = str_repeat("\t", $indent) . $key . "array(";
                 $out = array_merge($out, $arg->value->format($indent + 1));
                 $out[] = str_repeat("\t", $indent) . '),';
-            } else {
+            } else if (is_string($arg->value)) {
                 $out[] = str_repeat("\t", $indent) . $key . "{$arg->value},";
             }
         }

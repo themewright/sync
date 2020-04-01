@@ -62,7 +62,7 @@ class Blocks
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$functions, &$stylesScss, &$mainJs, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$functions, &$stylesScss, &$mainJs, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
@@ -84,43 +84,45 @@ class Blocks
             $oldChunk = $this->functions->getChunk($chunk);
 
             if ($oldChunk) {
-                preg_match('/\/\/ Include block: ([a-z0-9-]+) \(#[0-9]+\)/', $oldChunk['code'], $oldSlugMatch);
+                preg_match('/\/\/ Register block: ([a-z0-9_]+) \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
 
-                // Delete old files if the block slug changed
-                if ($oldSlugMatch && $oldSlugMatch[1] != $block->slug) {
-                    $this->deleteFiles($oldSlugMatch[1]);
+                // Delete old files if the block name changed
+                if ($oldNameMatch && $oldNameMatch[1] != $block->name) {
+                    $this->deleteFiles($oldNameMatch[1]);
                 }
             }
 
-            $class = $this->fs->file('includes/blocks/class-' . $block->slug . '.php');
-            $view = $this->fs->file('views/blocks/' . $block->slug . '.php');
-            $scss = $this->fs->file('assets/scss/blocks/_' . $block->slug . '.scss');
-            $js = $this->fs->file('assets/js/blocks/' . $block->slug . '.js');
+            $slug = Str::slug($block->name);
 
-            $classContent = $this->getClassContent($block);
-            $class->setContent($classContent)->saveWithMessages($this->messages);
+            $fields = $this->fs->file('includes/blocks/fields-' . $slug . '.php');
+            $view = $this->fs->file('views/blocks/' . $slug . '.php');
+            $scss = $this->fs->file('assets/scss/blocks/_' . $slug . '.scss');
+            $js = $this->fs->file('assets/js/blocks/' . $slug . '.js');
+
+            $fieldsContent = $this->getFieldsContent($block);
+            $fields->setContent($fieldsContent)->saveWithMessages($this->messages);
 
             if ($block->scss) {
                 $scss->setContent($block->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
-                $this->stylesScss->addPartial('blocks/' . $block->slug);
+                $this->stylesScss->addPartial('blocks/' . $slug);
             } else {
                 $scss->deleteWithMessages($this->messages);
-                $this->stylesScss->deletePartial('blocks/' . $block->slug);
+                $this->stylesScss->deletePartial('blocks/' . $slug);
             }
 
             if ($block->js) {
                 $js->setContent($block->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
-                $this->mainJs->addModule('./blocks/' . $block->slug);
+                $this->mainJs->addModule('./blocks/' . $slug);
             } else {
                 $js->deleteWithMessages($this->messages);
-                $this->mainJs->deleteModule('./blocks/' . $block->slug);
+                $this->mainJs->deleteModule('./blocks/' . $slug);
             }
 
             if ($block->viewRaw) {
                 $viewContent = $block->viewRaw;
             } else {
                 $elements = array_map(function ($args) use ($block) {
-                    return (new Element($args, $block->templates, $block->parts))->parse();
+                    return (new Element($args, $this->data->domain, $block->templates, $block->parts))->parse();
                 }, $block->view);
 
                 $viewContent = implode(PHP_EOL, $elements);
@@ -133,63 +135,27 @@ class Blocks
     }
 
     /**
-     * Gets the content of the block class file.
+     * Gets the content of the fields file.
      *
      * @param  mixed  $block
      * @return string
      */
-    protected function getClassContent($block)
+    protected function getFieldsContent($block)
     {
-        $classname = Str::studly($block->slug);
-
         $php = [
             "<?php",
-            "",
-            "namespace ThemeWright\\Blocks;",
-            "",
-            "/**",
-            " * Handles the {$block->name} block.",
-            " */",
-            "class {$classname} {",
-            "\t/**",
-            "\t * Class constructor.",
-            "\t */",
+            "TW_Block::register(",
+            "\t__( '{$block->label}', '{$this->data->domain}' ),",
+            "\t'{$block->name}',",
+            "\tarray(",
         ];
 
-        if ($block->fields) {
-            $php[] = "\tpublic function __construct() {";
-            $php[] = "\t\tadd_action( 'acf/init', array( \$this, 'register_fields' ) );";
-            $php[] = "\t}";
-            $php[] = "";
-            $php[] = "\t/**";
-            $php[] = "\t * Registers the ACF fields.";
-            $php[] = "\t *";
-            $php[] = "\t * @return void";
-            $php[] = "\t */";
-            $php[] = "\tpublic function register_fields() {";
-            $php[] = "\t\tacf_add_local_field_group(";
-            $php[] = "\t\t\tarray(";
-            $php[] = "\t\t\t\t'key'    => 'group_block_{$block->id}',";
-            $php[] = "\t\t\t\t'title'  => '{$block->name}',";
-            $php[] = "\t\t\t\t'fields' => array(";
-
-            foreach ($block->fields as $field) {
-                if ($field->type == 'field_group') {
-                    // @todo get fields from the group
-                } else {
-                    $php[] = (new Field($field))->build(5, "field_block_{$block->id}_");
-                }
-            }
-
-            $php[] = "\t\t\t\t),";
-            $php[] = "\t\t\t)";
-            $php[] = "\t\t);";
-            $php[] = "\t}";
-        } else {
-            $php[] = "\tpublic function __construct() { }";
+        foreach ($block->fields as $fieldArgs) {
+            $php[] = (new Field($fieldArgs))->build(2);
         }
 
-        $php[] = "}";
+        $php[] = "\t)";
+        $php[] = ");";
 
         return implode(PHP_EOL, $php);
     }
@@ -199,12 +165,14 @@ class Blocks
      *
      * This method does not delete TW functions, styles.scss and main.js code chunks.
      *
-     * @param  string  $slug
+     * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
      */
-    public function deleteFiles(string $slug)
+    public function deleteFiles(string $name)
     {
-        $this->fs->file('includes/blocks/class-' . $slug . '.php')->deleteWithMessages($this->messages);
+        $slug = Str::slug($name);
+
+        $this->fs->file('includes/blocks/fields-' . $slug . '.php')->deleteWithMessages($this->messages);
         $this->fs->file('views/blocks/' . $slug . '.php')->deleteWithMessages($this->messages);
         $this->fs->file('assets/scss/blocks/_' . $slug . '.scss')->deleteWithMessages($this->messages);
         $this->fs->file('assets/js/blocks/' . $slug . '.js')->deleteWithMessages($this->messages);
@@ -221,15 +189,19 @@ class Blocks
      */
     public function deleteExceptData()
     {
-        $slugs = array_column($this->data->blocks, 'slug');
+        $names = array_column($this->data->blocks, 'name');
 
-        $classes = $this->fs->getThemeFiles('includes/blocks');
+        foreach ($names as $i => $name) {
+            $names[$i] = str_replace('_', '-', $name);
+        }
 
-        foreach ($classes as $class) {
-            preg_match('/^class-([a-z0-9-]+)\.php$/', $class->basename, $partMatch);
+        $fieldsFiles = $this->fs->getThemeFiles('includes/blocks');
 
-            if ($partMatch && !in_array($partMatch[1], $slugs)) {
-                $class->deleteWithMessages($this->messages);
+        foreach ($fieldsFiles as $fields) {
+            preg_match('/^fields-([a-z0-9-]+)\.php$/', $fields->basename, $partMatch);
+
+            if ($partMatch && !in_array($partMatch[1], $names)) {
+                $fields->deleteWithMessages($this->messages);
             }
         }
 
@@ -241,7 +213,7 @@ class Blocks
         foreach ($assets as $asset) {
             preg_match('/^_?([a-z0-9-]+)\.(?:scss|js)$/', $asset->basename, $partMatch);
 
-            if ($partMatch && !in_array($partMatch[1], $slugs)) {
+            if ($partMatch && !in_array($partMatch[1], $names)) {
                 $asset->deleteWithMessages($this->messages);
             }
         }
@@ -251,7 +223,7 @@ class Blocks
         foreach ($views as $view) {
             preg_match('/^([a-z0-9-]+)\.php$/', $view->basename, $partMatch);
 
-            if ($partMatch && !in_array($partMatch[1], $slugs)) {
+            if ($partMatch && !in_array($partMatch[1], $names)) {
                 $view->deleteWithMessages($this->messages);
             }
         }
@@ -267,14 +239,13 @@ class Blocks
      */
     protected function createChunk($block)
     {
-        $classname = Str::studly($block->slug);
+        $slug = Str::slug($block->name);
 
         $chunk = [
             'type' => 'block',
             'code' => [
-                "// Include block: {$block->slug} (#{$block->id})",
-                "include get_template_directory() . '/includes/blocks/class-{$block->slug}.php';",
-                "new ThemeWright\\Blocks\\{$classname}();",
+                "// Register block: {$block->name} (#{$block->id})",
+                "include get_template_directory() . '/includes/blocks/fields-{$slug}.php';",
             ],
         ];
 

@@ -49,7 +49,7 @@ class Functions
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$messages = [])
     {
         $this->wpFile = (new Filesystem($themeDir))->file('functions.php');
         $this->twFile = (new Filesystem($themeDir))->file('tw-functions.php');
@@ -168,9 +168,6 @@ class Functions
         foreach ($this->chunks as $index => $_chunk) {
             if ($_chunk['type'] === $chunk['type']) {
                 switch ($chunk['type']) {
-                    case 'constants':
-                        $pattern = '/(\/\/ Define constants)/';
-                        break;
                     case 'includes':
                         $pattern = '/(\/\/ Include the ThemeWright files)/';
                         break;
@@ -178,7 +175,10 @@ class Functions
                         $pattern = '/(\/\/ Define global variables)/';
                         break;
                     case 'block':
-                        $pattern = '/\/\/ Include block: [a-z0-9-]+ \(#([0-9]+)\)/';
+                        $pattern = '/\/\/ Register block: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'block-group':
+                        $pattern = '/\/\/ Register block group: [a-z0-9_]+ \(#([0-9]+)\)/';
                         break;
                     case 'menu-page':
                         $pattern = '/\/\/ Register a new menu page \(#([0-9]+)\)/';
@@ -193,7 +193,7 @@ class Functions
                         $pattern = '/\/\/ Enqueue script: [a-z0-9-]+ \(#([0-9]+)\)/';
                         break;
                     case 'part':
-                        $pattern = '/\/\/ Template part specific options: [a-z0-9-]+\.php \(#([0-9]+)\)/';
+                        $pattern = '/\/\/ Register template part: [a-z0-9-]+\.php \(#([0-9]+)\)/';
                         break;
                     default:
                         $pattern = null;
@@ -222,14 +222,14 @@ class Functions
      */
     protected function identifyChunkType(string $code)
     {
-        if (strpos($code, '// Define constants') === 0) {
-            return 'constants';
-        } else if (strpos($code, '// Include the ThemeWright files') === 0) {
+        if (strpos($code, '// Include the ThemeWright files') === 0) {
             return 'includes';
         } else if (strpos($code, '// Define global variables') === 0) {
             return 'globals';
-        } else if (strpos($code, '// Include block') === 0) {
+        } else if (strpos($code, '// Register block:') === 0) {
             return 'block';
+        } else if (strpos($code, '// Register block group') === 0) {
+            return 'block-group';
         } else if (strpos($code, '// Register a new menu page') === 0) {
             return 'menu-page';
         } else if (strpos($code, '// Template specific options') === 0) {
@@ -238,7 +238,7 @@ class Functions
             return 'style';
         } else if (strpos($code, '// Enqueue script') === 0) {
             return 'script';
-        } else if (strpos($code, '// Template part specific options') === 0) {
+        } else if (strpos($code, '// Register template part') === 0) {
             return 'part';
         } else {
             return false;
@@ -253,7 +253,7 @@ class Functions
     protected function sortChunks()
     {
         usort($this->chunks, function ($a, $b) {
-            $order = ['constants', 'includes', 'globals'];
+            $order = ['includes', 'globals'];
 
             foreach ($order as $type) {
                 if ($a['type'] == $type) {
@@ -274,17 +274,11 @@ class Functions
      */
     public function build()
     {
-        $constantsChunk = [
-            'type' => 'constants',
-            'code' => "// Define constants" . PHP_EOL . "define( 'TW_DOMAIN', '{$this->data->domain}' );",
-        ];
-
         $globalsChunk = [
             'type' => 'globals',
-            'code' => "// Define global variables" . PHP_EOL . "\$postmeta = new TW_Fields();" . PHP_EOL . "\$field = new TW_Fields( 'post' );" . PHP_EOL . "\$option = new TW_Fields( 'option' );",
+            'code' => "// Define global variables" . PHP_EOL . "\$postmeta = new TW_Field();" . PHP_EOL . "\$field = new TW_Field( 'post' );" . PHP_EOL . "\$option = new TW_Field( 'option' );",
         ];
 
-        $this->updateChunk($constantsChunk);
         $this->updateChunk($globalsChunk);
         $this->sortChunks();
         $this->buildWpFile();

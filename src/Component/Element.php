@@ -84,6 +84,13 @@ class Element
     protected $args;
 
     /**
+     * The text domain of the theme.
+     *
+     * @var string
+     */
+    protected $domain;
+
+    /**
      * The related templates.
      *
      * @var mixed
@@ -115,12 +122,13 @@ class Element
      * Handles a view element and its properties.
      *
      * @param  mixed  $args
+     * @param  string  $domain
      * @param  array  $relatedTemplates
      * @param  array  $relatedParts
      * @param  array  $relatedBlockGroups
      * @return void
      */
-    public function __construct($args, $relatedTemplates = [], $relatedParts = [], $relatedBlockGroups = [])
+    public function __construct($args, $domain, $relatedTemplates = [], $relatedParts = [], $relatedBlockGroups = [])
     {
         $this->args = $args;
         $this->node = $args->node;
@@ -133,12 +141,13 @@ class Element
         $this->classes = $this->formatArgsPhp('cssClassesPhp');
         $this->attributes = $this->formatArgsPhp('attributesPhp');
 
+        $this->domain = $domain;
         $this->relatedTemplates = $relatedTemplates;
         $this->relatedParts = $relatedParts;
         $this->relatedBlockGroups = $relatedBlockGroups;
 
         $this->children = array_map(function ($args) {
-            return new Element($args, $this->relatedTemplates, $this->relatedParts, $this->relatedBlockGroups);
+            return new Element($args, $this->domain, $this->relatedTemplates, $this->relatedParts, $this->relatedBlockGroups);
         }, $args->children);
     }
 
@@ -167,7 +176,10 @@ class Element
             }
         }
 
-        return implode(PHP_EOL, $lines);
+        $php = implode(PHP_EOL, $lines);
+        $php = preg_replace('/(_[_e]\(\s*\'.+\',\s*\')[a-z0-9_]+(\'\s*\))/', "$1{$this->domain}$2", $php);
+
+        return $php;
     }
 
     /**
@@ -446,27 +458,17 @@ class Element
      */
     protected function parseBlockGroupElement($indent = 0)
     {
-        // if ($this->node == 'header') {
-        //     $php = 'get_header()';
-        // } else if (preg_match('/^header-([a-z0-9-]+)$/', $this->node, $match)) {
-        //     $php = "get_header( '{$match[1]}' )";
-        // } else if ($this->node == 'footer') {
-        //     $php = 'get_footer()';
-        // } else if (preg_match('/^footer-([a-z0-9-]+)$/', $this->node, $match)) {
-        //     $php = "get_footer( '{$match[1]}' )";
-        // } else if ($this->node == 'sidebar') {
-        //     $php = 'get_sidebar()';
-        // } else if (preg_match('/^sidebar-([a-z0-9-]+)$/', $this->node, $match)) {
-        //     $php = "get_sidebar( '{$match[1]}' )";
-        // } else if ($this->node == 'searchform') {
-        //     $php = "get_search_form()";
-        // } else {
-        //     $php = '';
-        // }
+        $i = array_search($this->foreignKey, array_column($this->relatedBlockGroups, 'id'));
 
-        // return [
-        //     str_repeat("\t", $indent) . '<?php ' . $php . '; ?' . '>',
-        // ];
+        if ($i === false) {
+            return [];
+        }
+
+        $blockGroupName = $this->relatedBlockGroups[$i]->name;
+
+        return [
+            str_repeat("\t", $indent) . "<?php TW_Block_Group::render( '{$blockGroupName}' ); ?" . ">",
+        ];
     }
 
     /**

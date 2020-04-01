@@ -7,6 +7,7 @@ use ThemeWright\Sync\Filesystem\Filesystem;
 use ThemeWright\Sync\Helper\Str;
 use ThemeWright\Sync\Http\Request;
 use ThemeWright\Sync\Http\Response;
+use ThemeWright\Sync\Theme\BlockGroups;
 use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\Bundlers;
 use ThemeWright\Sync\Theme\Functions;
@@ -98,6 +99,7 @@ class Application
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
+            (new BlockGroups($data, $functions, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
@@ -115,6 +117,11 @@ class Application
                     $functions->build();
                     $stylesScss->build();
                     $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'block-group':
+                    (new BlockGroups($data, $functions, $messages))->build();
+                    $functions->build();
                     $stylesheet->build($time);
                     break;
                 case 'menu-page':
@@ -176,7 +183,9 @@ class Application
         $allDirs = (new Filesystem())->listThemes();
 
         foreach ($allDirs as $dir) {
-            if ((int) (new Stylesheet($dir))->get('twid') === $themeId) {
+            $data = false;
+
+            if ((int) (new Stylesheet($dir, $data))->get('twid') === $themeId) {
                 return $dir;
             }
         }

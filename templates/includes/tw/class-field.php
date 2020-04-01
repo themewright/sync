@@ -2,7 +2,7 @@
 /**
  * Getter and setter helper class for ACF meta fields.
  */
-class TW_Fields {
+class TW_Field {
 	/**
 	 * The post ID where the value is saved.
 	 *
@@ -41,7 +41,7 @@ class TW_Fields {
 	 * @param  string  $selector
 	 * @return mixed
 	 */
-	public function __get( string $selector ) {
+	public function __get( $selector ) {
 		if ( function_exists( 'get_field' ) ) {
 			return get_field( $selector, $this->post_id );
 		}
@@ -53,10 +53,10 @@ class TW_Fields {
 	 * Sets a post meta value.
 	 *
 	 * @param  string  $selector
-	 * @param  mixed  $value
+	 * @param  mixed   $value
 	 * @return boolean
 	 */
-	public function __set( string $selector, $value ) {
+	public function __set( $selector, $value ) {
 		if ( function_exists( 'update_field' ) ) {
 			return update_field( $selector, $value, $this->post_id );
 		}

@@ -37,15 +37,41 @@ class Field
     {
         $args = new ArrayArgs();
 
-        $args->add('key', $keyPrefix . $this->args->name);
+        $keySuffix = $this->args->name ?: $this->args->twKey;
+
+        $args->add('key', $keyPrefix . $keySuffix);
 
         foreach ($this->args as $key => $value) {
-            $args->add(Str::snake($key), $value);
+            if ($value != '' && !is_null($value)) {
+                $snakeKey = Str::snake($key);
+
+                if ($snakeKey == 'choices') {
+                    $choices = [];
+
+                    foreach ($value as $option) {
+                        $choices[$option->value] = $option->text;
+                    }
+
+                    $args->add($snakeKey, $choices);
+                } else if ($snakeKey == 'sub_fields' || $snakeKey == 'layouts') {
+                    $subFields = [];
+
+                    foreach ($value as $subFieldArgs) {
+                        $subFields[] = (new Field($subFieldArgs))->build($indent + 1, $keyPrefix . $keySuffix . '__', 'ArrayArgs');
+                    }
+
+                    $args->add($snakeKey, $subFields);
+                } else {
+                    $args->add($snakeKey, $value);
+                }
+            }
         }
+
+        $args->remove('tw_key')->asort();
 
         $lines = [
             str_repeat("\t", $indent) . "array(",
-            implode("\n", $args->asort()->format($indent + 1)),
+            implode("\n", $args->format($indent + 1)),
             str_repeat("\t", $indent) . "),",
         ];
 

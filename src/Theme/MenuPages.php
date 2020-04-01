@@ -45,7 +45,7 @@ class MenuPages
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$functions, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$functions, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
@@ -101,7 +101,7 @@ class MenuPages
                 $viewContent = $menuPage->viewRaw;
             } else {
                 $elements = array_map(function ($args) {
-                    return (new Element($args))->parse();
+                    return (new Element($args, $this->data->domain))->parse();
                 }, $menuPage->view);
 
                 $viewContent = implode(PHP_EOL, $elements);
@@ -187,7 +187,8 @@ class MenuPages
             'type' => 'menu-page',
             'code' => [
                 "// Register a new menu page (#{$menuPage->id})",
-                "new TW_Menu_Page( array(",
+                "new TW_Menu_Page(",
+                "\tarray(",
             ],
         ];
 
@@ -208,9 +209,10 @@ class MenuPages
         $args->add('scss', !!$menuPage->scss);
         $args->add('js', !!$menuPage->js);
 
-        $chunk['code'] = array_merge($chunk['code'], $args->format());
+        $chunk['code'] = array_merge($chunk['code'], $args->format(2));
 
-        $chunk['code'][] = ") );";
+        $chunk['code'][] = "\t)";
+        $chunk['code'][] = ");";
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);
 

@@ -60,7 +60,7 @@ class Parts
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$functions, &$stylesScss, &$mainJs, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$functions, &$stylesScss, &$mainJs, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
@@ -82,7 +82,7 @@ class Parts
             $oldChunk = $this->functions->getChunk($chunk);
 
             if ($oldChunk) {
-                preg_match('/\/\/ Template part specific options: ([a-z0-9-]+)\.php \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
+                preg_match('/\/\/ Register template part: ([a-z0-9-]+)\.php \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
 
                 // Delete old files if the part name changed
                 if ($oldNameMatch && $oldNameMatch[1] != $part->name) {
@@ -114,13 +114,13 @@ class Parts
                 $fileContent = $part->viewRaw;
             } else {
                 $elements = array_map(function ($args) use ($part) {
-                    return (new Element($args, $part->templates, $part->parts))->parse();
+                    return (new Element($args, $this->data->domain, $part->templates, $part->parts))->parse();
                 }, $part->view);
 
                 $fileContent = implode(PHP_EOL, $elements);
             }
 
-            $file->setContent($fileContent)->saveWithMessages($this->messages);
+            $file->setContent($fileContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
@@ -191,20 +191,23 @@ class Parts
         $chunk = [
             'type' => 'part',
             'code' => [
-                "// Template part specific options: {$part->name}.php (#{$part->id})",
+                "// Register template part: {$part->name}.php (#{$part->id})",
             ],
         ];
 
         if ($part->args) {
-            $chunk['code'][] = "TW_Part::register( '{$part->name}', array(";
+            $chunk['code'][] = "TW_Part::register(";
+            $chunk['code'][] = "\t'{$part->name}',";
+            $chunk['code'][] = "\tarray(";
 
             foreach ($part->args as $arg) {
                 $name = ltrim($arg->name, '$');
                 $default = $arg->default ?: 'null';
-                $chunk['code'][] = "\t'{$name}' => {$default},";
+                $chunk['code'][] = "\t\t'{$name}' => {$default},";
             }
 
-            $chunk['code'][] = ") );";
+            $chunk['code'][] = "\t)";
+            $chunk['code'][] = ");";
         } else {
             $chunk['code'][] = "TW_Part::register( '{$part->name}' );";
         }

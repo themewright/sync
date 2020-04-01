@@ -42,7 +42,7 @@ class MainJs
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$messages = [])
     {
         $this->file = (new Filesystem($themeDir))->file('assets/js/main.js');
         $this->data = &$data;

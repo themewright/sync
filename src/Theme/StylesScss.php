@@ -42,7 +42,7 @@ class StylesScss
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$messages = [])
     {
         $this->file = (new Filesystem($themeDir))->file('assets/scss/styles.scss');
         $this->data = &$data;

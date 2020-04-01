@@ -4,7 +4,7 @@
  */
 class TW_Part {
 	/**
-	 * The registered template parts with their arguments.
+	 * The registered template parts and their arguments.
 	 *
 	 * @var array
 	 */
@@ -14,7 +14,7 @@ class TW_Part {
 	 * Registers a new template part and its default arguments.
 	 *
 	 * @param  string  $name
-	 * @param  array  $args
+	 * @param  array   $args
 	 * @return void
 	 */
 	public static function register( $name, $args = array() ) {
@@ -25,7 +25,7 @@ class TW_Part {
 	 * Renders a template part with custom arguments.
 	 *
 	 * @param  string  $name
-	 * @param  array  $args
+	 * @param  array   $args
 	 * @return void
 	 */
 	public static function render( $name, $args = array() ) {

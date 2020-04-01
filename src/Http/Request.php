@@ -38,6 +38,8 @@ class Request
 
         if ($this->request->server->get('REQUEST_METHOD') == 'OPTIONS') {
             (new Response())->send();
+        } else if ($this->request->server->get('REQUEST_METHOD') != 'POST') {
+            (new Response())->add('Method not allowed')->send(405);
         }
 
         $this->json = json_decode($this->request->getContent());

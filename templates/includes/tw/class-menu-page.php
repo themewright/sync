@@ -81,7 +81,7 @@ class TW_Menu_Page {
 	 *
 	 * @param  array  $data
 	 */
-	public function __construct( array $data ) {
+	public function __construct( $data ) {
 		$this->page_title  = $data['page_title'];
 		$this->menu_title  = $data['menu_title'];
 		$this->capability  = $data['capability'];

@@ -61,7 +61,7 @@ class Templates
      * @param  array  $messages
      * @return void
      */
-    public function __construct(string $themeDir, &$data = false, &$functions, &$stylesScss, &$mainJs, &$messages = [])
+    public function __construct(string $themeDir, &$data, &$functions, &$stylesScss, &$mainJs, &$messages = [])
     {
         $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
@@ -139,7 +139,7 @@ class Templates
                 $viewContent = $template->viewRaw;
             } else {
                 $elements = array_map(function ($args) use ($template) {
-                    return (new Element($args, $template->templates, $template->parts, $template->blockGroups))->parse();
+                    return (new Element($args, $this->data->domain, $template->templates, $template->parts, $template->blockGroups))->parse();
                 }, $template->view);
 
                 $viewContent = implode(PHP_EOL, $elements);
@@ -149,7 +149,7 @@ class Templates
                 $viewContent = "<?php /* Template name: {$template->name} */ ?" . ">" . PHP_EOL . $viewContent;
             }
 
-            $view->setContent($viewContent)->saveWithMessages($this->messages);
+            $view->setContent($viewContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
@@ -238,6 +238,24 @@ class Templates
                 "// Template specific options: {$template->name}.php (#{$template->id})",
             ],
         ];
+
+        if ($template->blockGroupIds) {
+            foreach ($template->blockGroupIds as $blockGroupId) {
+                $i = array_search($blockGroupId, array_column($this->data->blockGroups, 'id'));
+
+                if ($i !== false) {
+                    $chunk['code'][] = "TW_Block_Group::add_location( 'page_template', '==', '{$template->name}.php' );";
+                    $chunk['code'][] = "TW_Block_Group::add_location(";
+                    $chunk['code'][] = "\t'" . $this->data->blockGroups[$i]->name . "',";
+                    $chunk['code'][] = "\tarray(";
+                    $chunk['code'][] = "\t\t'param'    => 'page_template',";
+                    $chunk['code'][] = "\t\t'operator' => '==',";
+                    $chunk['code'][] = "\t\t'value'    => '{$template->name}.php',";
+                    $chunk['code'][] = "\t)";
+                    $chunk['code'][] = ");";
+                }
+            }
+        }
 
         if ($template->type == 'template' && $template->fields) {
             $chunk['code'][] = "include get_template_directory() . '/includes/templates/fields-{$template->name}.php';";
