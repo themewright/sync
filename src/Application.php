@@ -15,6 +15,7 @@ use ThemeWright\Sync\Theme\Includes;
 use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
 use ThemeWright\Sync\Theme\Parts;
+use ThemeWright\Sync\Theme\PostTypes;
 use ThemeWright\Sync\Theme\Scripts;
 use ThemeWright\Sync\Theme\Styles;
 use ThemeWright\Sync\Theme\Stylesheet;
@@ -98,6 +99,7 @@ class Application
             $mainJs->emptyModules();
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
+            (new PostTypes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new BlockGroups($data, $functions, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
@@ -112,6 +114,11 @@ class Application
         } else if ($commit - 1 == $stylesheet->get('commit')) {
             // Doing partially only when 1 commit difference
             switch ($action) {
+                case 'post-type':
+                    (new PostTypes($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
                 case 'block':
                     (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
                     $functions->build();

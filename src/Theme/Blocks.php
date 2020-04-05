@@ -144,6 +144,8 @@ class Blocks
     {
         $php = [
             "<?php",
+            "",
+            "// Register ACF field group for block: {$block->name}",
             "TW_Block::register(",
             "\t__( '{$block->label}', '{$this->data->domain}' ),",
             "\t'{$block->name}',",
@@ -163,7 +165,7 @@ class Blocks
     /**
      * Deletes all files associated to a content block.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
@@ -183,7 +185,7 @@ class Blocks
     /**
      * Deletes content blocks and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @return ThemeWright\Sync\Theme\Blocks
      */

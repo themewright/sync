@@ -106,14 +106,20 @@ class Templates
                             [
                                 'param' => 'page_template',
                                 'operator' => '==',
-                                'value' => $template->name . '.php',
+                                'value' => $template->name == 'page' ? 'default' : $template->name . '.php',
                             ],
                         ],
                     ],
                     'label_placement' => 'left',
                 ]);
 
-                $fieldsContent = '<?php' . PHP_EOL . $fieldGroup->build();
+                $fieldsContent = [
+                    "<?php",
+                    "",
+                    "// Register ACF field group for page template: " . ($template->name == 'page' ? 'default' : $template->name . '.php'),
+                    $fieldGroup->build(),
+                ];
+
                 $fields->setContent($fieldsContent)->saveWithMessages($this->messages);
             } else {
                 $fields->deleteWithMessages($this->messages);
@@ -145,7 +151,7 @@ class Templates
                 $viewContent = implode(PHP_EOL, $elements);
             }
 
-            if ($template->type == 'template') {
+            if ($template->type == 'template' && $template->name != 'page') {
                 $viewContent = "<?php /* Template name: {$template->name} */ ?" . ">" . PHP_EOL . $viewContent;
             }
 
@@ -158,7 +164,7 @@ class Templates
     /**
      * Deletes all files associated to a template.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Templates
@@ -176,7 +182,7 @@ class Templates
     /**
      * Deletes templates and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @return ThemeWright\Sync\Theme\Templates
      */
@@ -239,22 +245,15 @@ class Templates
             ],
         ];
 
-        if ($template->blockGroupIds) {
-            foreach ($template->blockGroupIds as $blockGroupId) {
-                $i = array_search($blockGroupId, array_column($this->data->blockGroups, 'id'));
-
-                if ($i !== false) {
-                    $chunk['code'][] = "TW_Block_Group::add_location( 'page_template', '==', '{$template->name}.php' );";
-                    $chunk['code'][] = "TW_Block_Group::add_location(";
-                    $chunk['code'][] = "\t'" . $this->data->blockGroups[$i]->name . "',";
-                    $chunk['code'][] = "\tarray(";
-                    $chunk['code'][] = "\t\t'param'    => 'page_template',";
-                    $chunk['code'][] = "\t\t'operator' => '==',";
-                    $chunk['code'][] = "\t\t'value'    => '{$template->name}.php',";
-                    $chunk['code'][] = "\t)";
-                    $chunk['code'][] = ");";
-                }
-            }
+        foreach ($template->blockGroups as $blockGroup) {
+            $chunk['code'][] = "TW_Block_Group::add_location(";
+            $chunk['code'][] = "\t'" . $blockGroup->name . "',";
+            $chunk['code'][] = "\tarray(";
+            $chunk['code'][] = "\t\t'param'    => 'page_template',";
+            $chunk['code'][] = "\t\t'operator' => '==',";
+            $chunk['code'][] = "\t\t'value'    => '" . ($template->name == 'page' ? 'default' : $template->name . '.php') . "',";
+            $chunk['code'][] = "\t)";
+            $chunk['code'][] = ");";
         }
 
         if ($template->type == 'template' && $template->fields) {

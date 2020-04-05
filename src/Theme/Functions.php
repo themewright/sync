@@ -129,7 +129,7 @@ class Functions
      * Adds a new or updates an existing TW functions code chunk.
      *
      * @param  array  $chunk
-     * @return void
+     * @return int
      */
     public function updateChunk(array $chunk)
     {
@@ -140,6 +140,8 @@ class Functions
         } else {
             $this->addChunk($chunk);
         }
+
+        return $index !== false ? $index : count($this->chunks) - 1;
     }
 
     /**
@@ -173,6 +175,9 @@ class Functions
                         break;
                     case 'globals':
                         $pattern = '/(\/\/ Define global variables)/';
+                        break;
+                    case 'post-type':
+                        $pattern = '/\/\/ Post type: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
                     case 'block':
                         $pattern = '/\/\/ Register block: [a-z0-9_]+ \(#([0-9]+)\)/';
@@ -226,6 +231,8 @@ class Functions
             return 'includes';
         } else if (strpos($code, '// Define global variables') === 0) {
             return 'globals';
+        } else if (strpos($code, '// Post type') === 0) {
+            return 'post-type';
         } else if (strpos($code, '// Register block:') === 0) {
             return 'block';
         } else if (strpos($code, '// Register block group') === 0) {
@@ -246,28 +253,6 @@ class Functions
     }
 
     /**
-     * Sorts the chunks by their type.
-     *
-     * @return void
-     */
-    protected function sortChunks()
-    {
-        usort($this->chunks, function ($a, $b) {
-            $order = ['includes', 'globals'];
-
-            foreach ($order as $type) {
-                if ($a['type'] == $type) {
-                    return -1;
-                } else if ($b['type'] == $type) {
-                    return 1;
-                }
-            }
-
-            return 0;
-        });
-    }
-
-    /**
      * Creates new or updates existing (tw-)functions.php files.
      *
      * @return void
@@ -276,11 +261,23 @@ class Functions
     {
         $globalsChunk = [
             'type' => 'globals',
-            'code' => "// Define global variables" . PHP_EOL . "\$postmeta = new TW_Field();" . PHP_EOL . "\$field = new TW_Field( 'post' );" . PHP_EOL . "\$option = new TW_Field( 'option' );",
+            'code' => [
+                "// Define global variables",
+                "\$postmeta = new TW_Field();",
+                "\$_postmeta = \$field = new TW_Field( 'post' );",
+                "\$option = new TW_Field( 'option' );",
+            ],
         ];
 
-        $this->updateChunk($globalsChunk);
-        $this->sortChunks();
+        $globalsChunk['code'] = implode(PHP_EOL, $globalsChunk['code']);
+        $globalsChunkIndex = $this->getChunkIndex($globalsChunk);
+
+        if ($globalsChunkIndex !== false) {
+            $this->chunks[$globalsChunkIndex] = $globalsChunk;
+        } else {
+            array_splice($this->chunks, 1, 0, [$globalsChunk]);
+        }
+
         $this->buildWpFile();
         $this->buildTwFile();
     }

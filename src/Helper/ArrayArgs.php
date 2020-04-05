@@ -51,6 +51,8 @@ class ArrayArgs
             $value = 'false';
         } else if (is_null($value)) {
             $value = 'null';
+        } else if (is_string($value) && strpos($value, '@php:') === 0) {
+            $value = substr($value, 5);
         } else if (is_string($value)) {
             $value = "'{$value}'";
         } else if (is_array($value)) {
@@ -124,7 +126,7 @@ class ArrayArgs
                 $out[] = str_repeat("\t", $indent) . $key . "array(";
                 $out = array_merge($out, $arg->value->format($indent + 1));
                 $out[] = str_repeat("\t", $indent) . '),';
-            } else if (is_string($arg->value)) {
+            } else if (is_string($arg->value) || is_numeric($arg->value)) {
                 $out[] = str_repeat("\t", $indent) . $key . "{$arg->value},";
             }
         }

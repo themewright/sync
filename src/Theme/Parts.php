@@ -129,7 +129,7 @@ class Parts
     /**
      * Deletes all files associated to a template part.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
@@ -146,7 +146,7 @@ class Parts
     /**
      * Deletes template parts and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions, styles.scss and main.js code chunks.
+     * This method does not delete TW functions code chunks, styles.scss and main.js.
      *
      * @return ThemeWright\Sync\Theme\Parts
      */
