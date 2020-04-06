@@ -46,10 +46,10 @@ class Field
                 $snakeKey = Str::snake($key);
 
                 if ($snakeKey == 'choices') {
-                    $choices = [];
+                    $choices = new ArrayArgs;
 
                     foreach ($value as $option) {
-                        $choices[$option->value] = $option->text;
+                        $choices->add($option->value, $option->text);
                     }
 
                     $args->add($snakeKey, $choices);

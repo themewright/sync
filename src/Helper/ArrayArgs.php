@@ -43,7 +43,7 @@ class ArrayArgs
      * @param  mixed  $value
      * @return ThemeWright\Sync\Helper\ArrayArgs
      */
-    public function add(string $key, $value)
+    public function add($key, $value)
     {
         if ($value === true) {
             $value = 'true';
@@ -56,19 +56,22 @@ class ArrayArgs
         } else if (is_string($value)) {
             $value = "'{$value}'";
         } else if (is_array($value)) {
-            $value = new ArrayArgs($value, true);
+            $value = new ArrayArgs($value);
         } else if (is_object($value) && !is_a($value, 'ThemeWright\Sync\Helper\ArrayArgs')) {
-            $value = new ArrayArgs((array) $value, true);
+            $value = $value;
         }
 
-        if (strlen($key) > $this->maxKeyChars) {
-            $this->maxKeyChars = strlen($key);
-        }
-
-        $this->args[$key] = (object) [
+        $arg = (object) [
             'key' => $key,
             'value' => $value,
         ];
+
+        if (strlen($key) > $this->maxKeyChars) {
+            $this->maxKeyChars = strlen($key);
+            $this->args[$key] = $arg;
+        } else {
+            $this->args[] = $arg;
+        }
 
         return $this;
     }
@@ -101,11 +104,21 @@ class ArrayArgs
     /**
      * Sort the array arguments and maintain index association.
      *
+     * @param  bool  $deep
      * @return ThemeWright\Sync\Helper\ArrayArgs
      */
-    public function asort()
+    public function asort($deep = false)
     {
         asort($this->args);
+
+        if ($deep) {
+            foreach ($this->args as $arg) {
+                if ($arg->value instanceof ArrayArgs) {
+                    $arg->value->asort(true);
+                }
+            }
+        }
+
         return $this;
     }
 
@@ -120,7 +133,7 @@ class ArrayArgs
         $out = [];
 
         foreach ($this->args as $arg) {
-            $key = $arg->key ? "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
+            $key = $arg->key != '' ? "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
 
             if ($arg->value instanceof ArrayArgs) {
                 $out[] = str_repeat("\t", $indent) . $key . "array(";

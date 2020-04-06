@@ -179,6 +179,9 @@ class Functions
                     case 'post-type':
                         $pattern = '/\/\/ Post type: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
+                    case 'taxonomy':
+                        $pattern = '/\/\/ Taxonomy: [a-z0-9_-]+ \(#([0-9]+)\)/';
+                        break;
                     case 'block':
                         $pattern = '/\/\/ Register block: [a-z0-9_]+ \(#([0-9]+)\)/';
                         break;
@@ -233,6 +236,8 @@ class Functions
             return 'globals';
         } else if (strpos($code, '// Post type') === 0) {
             return 'post-type';
+        } else if (strpos($code, '// Taxonomy') === 0) {
+            return 'taxonomy';
         } else if (strpos($code, '// Register block:') === 0) {
             return 'block';
         } else if (strpos($code, '// Register block group') === 0) {

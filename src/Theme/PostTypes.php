@@ -10,11 +10,18 @@ use ThemeWright\Sync\Helper\Str;
 class PostTypes
 {
     /**
-     * Array of reserved pos type keys.
+     * Array of reserved post type keys.
      *
      * @var array
      */
     protected $reserved = ['post', 'page', 'attachment', 'revision', 'nav_menu_item'];
+
+    /**
+     * Array of all post type support features.
+     *
+     * @var array
+     */
+    protected $supports = ['title', 'editor', 'author', 'thumbnail', 'excerpt', 'trackbacks', 'pageAttributes', 'customFields', 'comments', 'revisions', 'postFormats'];
 
     /**
      * Array of default support features for the 'post' post type.
@@ -83,7 +90,7 @@ class PostTypes
     }
 
     /**
-     * Builds the custom post types registration and field files.
+     * Builds the custom post type registration and field files.
      *
      * @return void
      */
@@ -94,11 +101,11 @@ class PostTypes
             $oldChunk = $this->functions->getChunk($chunk);
 
             if ($oldChunk) {
-                preg_match('/\/\/ Post type: ([a-z0-9_-]+) \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
+                preg_match('/\/\/ Post type: ([a-z0-9_-]+) \(#[0-9]+\)/', $oldChunk['code'], $oldKeyMatch);
 
                 // Delete old files if the post type key changed
-                if ($oldNameMatch && $oldNameMatch[1] != $postType->postType) {
-                    $this->deleteFiles($oldNameMatch[1]);
+                if ($oldKeyMatch && $oldKeyMatch[1] != $postType->postType) {
+                    $this->deleteFiles($oldKeyMatch[1]);
                 }
             }
 
@@ -118,9 +125,9 @@ class PostTypes
                     'location' => [
                         [
                             [
-                                'param' => 'post_type',
+                                'param' => $postType->postType == 'attachment' ? 'attachment' : 'post_type',
                                 'operator' => '==',
-                                'value' => $postType->postType,
+                                'value' => $postType->postType == 'attachment' ? 'all' : $postType->postType,
                             ],
                         ],
                     ],
@@ -174,19 +181,19 @@ class PostTypes
                                 $labelValue = "@php:_x( '{$labelValue}', 'post type singular name', '{$this->data->domain}' )";
                                 break;
                             case 'add_new':
-                                $labelValue = "@php:_x( '{$labelValue}', 'post', '{$this->data->domain}' )";
+                                $labelValue = "@php:_x( '{$labelValue}', '{$postType->postType}', '{$this->data->domain}' )";
                                 break;
                             case 'featured_image':
-                                $labelValue = "@php:_x('{$labelValue}', 'post', '{$this->data->domain}')";
+                                $labelValue = "@php:_x( '{$labelValue}', '{$postType->postType}', '{$this->data->domain}' )";
                                 break;
                             case 'set_featured_image':
-                                $labelValue = "@php:_x('{$labelValue}', 'post', '{$this->data->domain}')";
+                                $labelValue = "@php:_x( '{$labelValue}', '{$postType->postType}', '{$this->data->domain}' )";
                                 break;
                             case 'remove_featured_image':
-                                $labelValue = "@php:_x('{$labelValue}', 'post', '{$this->data->domain}')";
+                                $labelValue = "@php:_x( '{$labelValue}', '{$postType->postType}', '{$this->data->domain}' )";
                                 break;
                             case 'use_featured_image':
-                                $labelValue = "@php:_x('{$labelValue}', 'post', '{$this->data->domain}')";
+                                $labelValue = "@php:_x( '{$labelValue}', '{$postType->postType}', '{$this->data->domain}' )";
                                 break;
                             default:
                                 $labelValue = "@php:__( '{$labelValue}', '{$this->data->domain}' )";
@@ -250,7 +257,7 @@ class PostTypes
             "\tregister_post_type(",
             "\t\t'{$postType->postType}',",
             "\t\tarray(",
-            implode(PHP_EOL, (new ArrayArgs($args))->asort()->format(3)),
+            implode(PHP_EOL, (new ArrayArgs($args))->asort(true)->format(3)),
             "\t\t)",
             "\t);",
             "}",
@@ -316,6 +323,7 @@ class PostTypes
         ];
 
         if (in_array($postType->postType, $this->reserved)) {
+            $addSupports = [];
             $removeSupports = [];
 
             if ($postType->postType == 'post') {
@@ -328,19 +336,29 @@ class PostTypes
                 $defaultSupports = [];
             }
 
-            $removeSupports = array_filter($defaultSupports, function ($feature) use ($postType) {
-                return !$postType->args->supports->$feature;
-            });
+            foreach ($this->supports as $feature) {
+                if ($postType->args->supports->$feature && !in_array($feature, $defaultSupports)) {
+                    $addSupports[] = $feature;
+                } else if (!$postType->args->supports->$feature && in_array($feature, $defaultSupports)) {
+                    $removeSupports[] = $feature;
+                }
+            }
 
-            if ($removeSupports) {
-                $chunk['code'][] = "function tw_remove_post_type_supports_{$postType->id}() {";
+            if ($addSupports || $removeSupports) {
+                $chunk['code'][] = "function tw_change_post_type_supports_{$postType->id}() {";
+
+                if ($addSupports) {
+                    $features = count($addSupports) > 1 ? "array( '" . implode("', '", $addSupports) . "' )" : "'{$addSupports[0]}'";
+                    $chunk['code'][] = "\tadd_post_type_support( '{$postType->postType}', {$features} );";
+                }
 
                 foreach ($removeSupports as $feature) {
+                    $feature = Str::kebab($feature);
                     $chunk['code'][] = "\tremove_post_type_support( '{$postType->postType}', '{$feature}' );";
                 }
 
                 $chunk['code'][] = "}";
-                $chunk['code'][] = "add_action( 'init', 'tw_remove_post_type_supports_{$postType->id}' );";
+                $chunk['code'][] = "add_action( 'init', 'tw_change_post_type_supports_{$postType->id}' );";
             }
         } else {
             $chunk['code'][] = "include get_template_directory() . '/includes/post-types/register-{$postType->postType}.php';";

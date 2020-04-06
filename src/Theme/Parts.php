@@ -114,7 +114,7 @@ class Parts
                 $fileContent = $part->viewRaw;
             } else {
                 $elements = array_map(function ($args) use ($part) {
-                    return (new Element($args, $this->data->domain, $part->templates, $part->parts))->parse();
+                    return (new Element($args, $this->data->domain, $part->templates, $part->parts, $part->blockGroups))->parse();
                 }, $part->view);
 
                 $fileContent = implode(PHP_EOL, $elements);

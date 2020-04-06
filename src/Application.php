@@ -20,6 +20,7 @@ use ThemeWright\Sync\Theme\Scripts;
 use ThemeWright\Sync\Theme\Styles;
 use ThemeWright\Sync\Theme\Stylesheet;
 use ThemeWright\Sync\Theme\StylesScss;
+use ThemeWright\Sync\Theme\Taxonomies;
 use ThemeWright\Sync\Theme\Templates;
 
 class Application
@@ -100,6 +101,7 @@ class Application
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
             (new PostTypes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Taxonomies($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new BlockGroups($data, $functions, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
@@ -116,6 +118,11 @@ class Application
             switch ($action) {
                 case 'post-type':
                     (new PostTypes($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'taxonomy':
+                    (new Taxonomies($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
                     break;
