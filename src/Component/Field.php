@@ -15,14 +15,22 @@ class Field
     protected $args;
 
     /**
+     * The related field sets.
+     *
+     * @var mixed
+     */
+    protected $fieldSets;
+
+    /**
      * Handles an ACF field.
      *
      * @param  mixed  $args
      * @return void
      */
-    public function __construct($args)
+    public function __construct($args, $fieldSets)
     {
         $this->args = $args;
+        $this->fieldSets = $fieldSets;
     }
 
     /**
@@ -57,7 +65,15 @@ class Field
                     $subFields = [];
 
                     foreach ($value as $subFieldArgs) {
-                        $subFields[] = (new Field($subFieldArgs))->build($indent + 1, $keyPrefix . $keySuffix . '__', 'ArrayArgs');
+                        if (isset($subFieldArgs->fieldSet)) {
+                            $i = array_search($subFieldArgs->fieldSet, array_column($this->fieldSets, 'id'));
+
+                            foreach ($this->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                                $subFields[] = (new Field($fieldSetFieldArgs, []))->build($indent + 1, $keyPrefix . $keySuffix . '__', 'ArrayArgs');
+                            }
+                        } else {
+                            $subFields[] = (new Field($subFieldArgs, $this->fieldSets))->build($indent + 1, $keyPrefix . $keySuffix . '__', 'ArrayArgs');
+                        }
                     }
 
                     $args->add($snakeKey, $subFields);

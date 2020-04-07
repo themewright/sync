@@ -132,7 +132,7 @@ class PostTypes
                         ],
                     ],
                     'label_placement' => 'left',
-                ]);
+                ], $postType->fieldSets);
 
                 $fieldsContent = [
                     "<?php",

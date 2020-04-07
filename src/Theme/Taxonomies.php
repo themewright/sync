@@ -104,7 +104,7 @@ class Taxonomies
                         ],
                     ],
                     'label_placement' => 'left',
-                ]);
+                ], $taxonomy->fieldSets);
 
                 $fieldsContent = [
                     "<?php",

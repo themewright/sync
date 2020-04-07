@@ -171,6 +171,16 @@ class Application
                     $mainJs->build();
                     $stylesheet->build($time);
                     break;
+                case 'field-set':
+                    (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    (new PostTypes($themeDir, $data, $functions, $messages))->build();
+                    (new Taxonomies($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesScss->build();
+                    $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
                 default:
                     break;
             }

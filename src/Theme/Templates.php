@@ -111,7 +111,7 @@ class Templates
                         ],
                     ],
                     'label_placement' => 'left',
-                ]);
+                ], $template->fieldSets);
 
                 $fieldsContent = [
                     "<?php",

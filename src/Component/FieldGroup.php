@@ -43,12 +43,19 @@ class FieldGroup
     protected $args;
 
     /**
+     * The related field sets.
+     *
+     * @var mixed
+     */
+    protected $fieldSets;
+
+    /**
      * Handles an ACF field group.
      *
      * @param  array  $args
      * @return void
      */
-    public function __construct(array $args)
+    public function __construct($args, $fieldSets)
     {
         $this->fields = $args['fields'] ?? [];
         $this->id = $args['id'] ?? Str::random(12);
@@ -62,6 +69,7 @@ class FieldGroup
         $this->active = $args['active'] ?? true;
         $this->description = $args['description'] ?? '';
         $this->args = $args;
+        $this->fieldSets = $fieldSets;
     }
 
     /**
@@ -76,8 +84,17 @@ class FieldGroup
         $fields = new ArrayArgs();
 
         foreach ($this->fields as $fieldArgs) {
-            $field = (new Field($fieldArgs))->build($indent + 1, "field_{$this->id}_", 'ArrayArgs');
-            $fields->add('', $field);
+            if (isset($fieldArgs->fieldSet)) {
+                $i = array_search($fieldArgs->fieldSet, array_column($this->fieldSets, 'id'));
+
+                foreach ($this->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                    $field = (new Field($fieldSetFieldArgs, $this->fieldSets))->build($indent + 1, "field_{$this->id}_", 'ArrayArgs');
+                    $fields->add('', $field);
+                }
+            } else {
+                $field = (new Field($fieldArgs, $this->fieldSets))->build($indent + 1, "field_{$this->id}_", 'ArrayArgs');
+                $fields->add('', $field);
+            }
         }
 
         $args->add('key', "group_{$this->id}");

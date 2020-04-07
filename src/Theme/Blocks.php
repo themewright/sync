@@ -153,7 +153,15 @@ class Blocks
         ];
 
         foreach ($block->fields as $fieldArgs) {
-            $php[] = (new Field($fieldArgs))->build(2);
+            if (isset($fieldArgs->fieldSet)) {
+                $i = array_search($fieldArgs->fieldSet, array_column($block->fieldSets, 'id'));
+
+                foreach ($block->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                    $php[] = (new Field($fieldSetFieldArgs, $block->fieldSets))->build(2);
+                }
+            } else {
+                $php[] = (new Field($fieldArgs, $block->fieldSets))->build(2);
+            }
         }
 
         $php[] = "\t)";
