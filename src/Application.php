@@ -12,11 +12,13 @@ use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\Bundlers;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
+use ThemeWright\Sync\Theme\JsModules;
 use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
 use ThemeWright\Sync\Theme\Parts;
 use ThemeWright\Sync\Theme\PostTypes;
 use ThemeWright\Sync\Theme\Scripts;
+use ThemeWright\Sync\Theme\ScssPartials;
 use ThemeWright\Sync\Theme\Styles;
 use ThemeWright\Sync\Theme\Stylesheet;
 use ThemeWright\Sync\Theme\StylesScss;
@@ -107,6 +109,8 @@ class Application
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
+            (new ScssPartials($themeDir, $data, $stylesScss, $messages))->deleteExceptData()->build();
+            (new JsModules($themeDir, $data, $mainJs, $messages))->deleteExceptData()->build();
             (new Styles($themeDir, $data, $functions))->build();
             (new Scripts($themeDir, $data, $functions))->build();
             $functions->build();
@@ -178,6 +182,16 @@ class Application
                     (new Taxonomies($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesScss->build();
+                    $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'scss-partial':
+                    (new ScssPartials($themeDir, $data, $stylesScss, $messages))->build();
+                    $stylesScss->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'js-module':
+                    (new JsModules($themeDir, $data, $mainJs, $messages))->build();
                     $mainJs->build();
                     $stylesheet->build($time);
                     break;

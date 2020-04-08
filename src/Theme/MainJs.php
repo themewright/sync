@@ -58,10 +58,18 @@ class MainJs
      */
     protected function parseModules()
     {
-        preg_match_all('/import \'([a-z0-9\/\.-]+)\';/', $this->file->getContent(), $matches);
+        preg_match_all('/import \'([a-z0-9\/\.-]+)\'; \/\/ ([0-9-]+)/', $this->file->getContent(), $matches);
 
-        foreach ($matches[1] as $path) {
-            $this->modules[] = $path;
+        foreach ($matches[1] as $i => $path) {
+            $numbers = explode('-', $matches[2][$i]);
+            $priority = $numbers[0];
+            $id = isset($numbers[1]) ? (int) $numbers[1] : null;
+
+            $this->modules[$path] = (object) [
+                'id' => $id,
+                'path' => $path,
+                'priority' => $priority,
+            ];
         }
     }
 
@@ -79,27 +87,64 @@ class MainJs
      * Adds a new JS module.
      *
      * @param  string  $path
+     * @param  int  $id
+     * @param  int  $priority
      * @return void
      */
-    public function addModule(string $path)
+    public function addModule(string $path, int $id = null, int $priority = 1000)
     {
-        if (!in_array($path, $this->modules)) {
-            $this->modules[] = $path;
-        }
+        $this->modules[$path] = (object) [
+            'id' => $id,
+            'path' => $path,
+            'priority' => $priority,
+        ];
     }
 
     /**
-     * Deletes a JS module.
+     * Gets a JS module by its argument value.
+     *
+     * @param  string  $arg
+     * @param  mixed  $value
+     * @return array
+     */
+    public function getModuleBy(string $arg, $value)
+    {
+        $found = null;
+
+        foreach ($this->modules as $module) {
+            if ($module->$arg == $value) {
+                $found = $module;
+                break;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
+     * Deletes a JS module by its path.
      *
      * @param  string  $path
      * @return void
      */
     public function deleteModule(string $path)
     {
-        $index = array_search($path, $this->modules);
+        unset($this->modules[$path]);
+    }
 
-        if ($index !== false) {
-            unset($this->modules[$index]);
+    /**
+     * Deletes a JS module by an argument value.
+     *
+     * @param  string  $arg
+     * @param  mixed  $value
+     * @return void
+     */
+    public function deleteModuleBy(string $arg, $value)
+    {
+        $module = $this->getModuleBy($arg, $value);
+
+        if ($module) {
+            $this->deleteModule($module->path);
         }
     }
 
@@ -110,10 +155,20 @@ class MainJs
      */
     public function build()
     {
+        ksort($this->modules);
+
+        usort($this->modules, function ($a, $b) {
+            if ($a->priority == $b->priority) {
+                return 0;
+            }
+
+            return $a->priority < $b->priority ? -1 : 1;
+        });
+
         $content = [];
 
         foreach ($this->modules as $module) {
-            $content[] = "import '{$module}';";
+            $content[] = "import '" . $module->path . "'; // " . $module->priority . ($module->id ? '-' . $module->id : '');
         }
 
         $this->file->setContent($content)->saveWithMessages($this->messages);
