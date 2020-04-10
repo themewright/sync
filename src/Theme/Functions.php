@@ -203,6 +203,15 @@ class Functions
                     case 'part':
                         $pattern = '/\/\/ Register template part: [a-z0-9-]+\.php \(#([0-9]+)\)/';
                         break;
+                    case 'filter':
+                        $pattern = '/\/\/ Add filter: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'action':
+                        $pattern = '/\/\/ Add action: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'ajax':
+                        $pattern = '/\/\/ Add Ajax: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
                     default:
                         $pattern = null;
                         break;
@@ -252,6 +261,12 @@ class Functions
             return 'script';
         } else if (strpos($code, '// Register template part') === 0) {
             return 'part';
+        } else if (strpos($code, '// Add filter') === 0) {
+            return 'filter';
+        } else if (strpos($code, '// Add action') === 0) {
+            return 'action';
+        } else if (strpos($code, '// Add Ajax') === 0) {
+            return 'ajax';
         } else {
             return false;
         }

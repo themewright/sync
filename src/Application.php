@@ -7,9 +7,12 @@ use ThemeWright\Sync\Filesystem\Filesystem;
 use ThemeWright\Sync\Helper\Str;
 use ThemeWright\Sync\Http\Request;
 use ThemeWright\Sync\Http\Response;
+use ThemeWright\Sync\Theme\Actions;
+use ThemeWright\Sync\Theme\Ajaxes;
 use ThemeWright\Sync\Theme\BlockGroups;
 use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\Bundlers;
+use ThemeWright\Sync\Theme\Filters;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
 use ThemeWright\Sync\Theme\JsModules;
@@ -111,6 +114,9 @@ class Application
             (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new ScssPartials($themeDir, $data, $stylesScss, $messages))->deleteExceptData()->build();
             (new JsModules($themeDir, $data, $mainJs, $messages))->deleteExceptData()->build();
+            (new Filters($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Actions($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Ajaxes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Styles($themeDir, $data, $functions))->build();
             (new Scripts($themeDir, $data, $functions))->build();
             $functions->build();
@@ -193,6 +199,21 @@ class Application
                 case 'js-module':
                     (new JsModules($themeDir, $data, $mainJs, $messages))->build();
                     $mainJs->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'filter':
+                    (new Filters($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'action':
+                    (new Actions($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'ajax':
+                    (new Ajaxes($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
                     $stylesheet->build($time);
                     break;
                 default:
