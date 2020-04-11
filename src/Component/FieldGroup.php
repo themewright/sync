@@ -97,6 +97,9 @@ class FieldGroup
             }
         }
 
+        static::fixConditionalLogics($fields);
+        $fields->remove('tw_key', true)->remove('auto_name', true);
+
         $args->add('key', "group_{$this->id}");
         $args->add('title', $this->title);
         $args->add('fields', $fields);
@@ -120,5 +123,71 @@ class FieldGroup
         ];
 
         return implode(PHP_EOL, $lines);
+    }
+
+    /**
+     * Replaces 'twKey' with 'key' in conditional logics.
+     *
+     * @param  ThemeWright\Sync\Helper\ArrayArgs  $fields
+     * @param  array  $keyMap
+     * @return void
+     */
+    public static function fixConditionalLogics(&$fields, $keyMap = null)
+    {
+        if (is_null($keyMap)) {
+            $keyMap = static::mapFieldKeys($fields);
+        }
+
+        foreach ($fields->args as $field) {
+            foreach ($field->value->args as $arg) {
+                if ($arg->key == 'conditional_logic') {
+                    foreach ($arg->value as $andGroup) {
+                        foreach ($andGroup as $orGroup) {
+                            foreach ($orGroup->value->args as $condition) {
+                                foreach ($condition->value->args as $conditionArg) {
+                                    if ($conditionArg->key == 'field') {
+                                        $conditionArg->value = $keyMap[$conditionArg->value] ?? $conditionArg->value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isset($field->value->args['sub_fields'])) {
+                static::fixConditionalLogics($field->value->args['sub_fields']->value, $keyMap);
+            }
+
+            if (isset($field->value->args['layouts'])) {
+                static::fixConditionalLogics($field->value->args['layouts']->value, $keyMap);
+            }
+        }
+    }
+
+    /**
+     * Find 'twKey' and 'key' pairs in fields.
+     *
+     * @param  array  $fields
+     * @param  array  $keyMap
+     * @return array
+     */
+    public static function mapFieldKeys($fields, &$keyMap = [])
+    {
+        foreach ($fields->args as $field) {
+            if (isset($field->value->args['tw_key'])) {
+                $keyMap[$field->value->args['tw_key']->value] = $field->value->args['key']->value;
+            }
+
+            if (isset($field->value->args['sub_fields'])) {
+                static::mapFieldKeys($field->value->args['sub_fields']->value, $keyMap);
+            }
+
+            if (isset($field->value->args['layouts'])) {
+                static::mapFieldKeys($field->value->args['layouts']->value, $keyMap);
+            }
+        }
+
+        return $keyMap;
     }
 }

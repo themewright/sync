@@ -65,7 +65,7 @@ class MenuPages
             $oldChunk = $this->functions->getChunk($chunk);
 
             if ($oldChunk) {
-                preg_match('/\'menu_slug\'\s*=>\s*\'([a-z-]+)\'/', $oldChunk['code'], $oldMenuSlugMatch);
+                preg_match('/\/\/ Register menu page: ([a-z0-9_-]+) \(#[0-9]+\)/', $oldChunk['code'], $oldMenuSlugMatch);
 
                 // Delete old files if the menu slug changed
                 if ($oldMenuSlugMatch && $oldMenuSlugMatch[1] != $menuPage->menuSlug) {
@@ -129,7 +129,7 @@ class MenuPages
         $this->fs->file('assets/js/' . $menuSlug . '.menu-page.js')->deleteWithMessages($this->messages);
         $this->fs->file('assets/js/dist/' . $menuSlug . '.menu-page.js')->deleteWithMessages($this->messages);
         $this->fs->file('assets/js/dist/' . $menuSlug . '.menu-page.js.map')->deleteWithMessages($this->messages);
-        $this->fs->file('assets/views/menu-pages/' . $menuSlug . '.php')->deleteWithMessages($this->messages);
+        $this->fs->file('views/menu-pages/' . $menuSlug . '.php')->deleteWithMessages($this->messages);
 
         return $this;
     }
@@ -153,7 +153,7 @@ class MenuPages
         );
 
         foreach ($assets as $asset) {
-            preg_match('/^([a-z0-9-]+)\.menu-page\.(?:css|css\.map|scss|js|js\.map)$/', $asset->basename, $menuSlugMatch);
+            preg_match('/^([a-z0-9_-]+)\.menu-page\.(?:css|css\.map|scss|js|js\.map)$/', $asset->basename, $menuSlugMatch);
 
             if ($menuSlugMatch && !in_array($menuSlugMatch[1], $menuSlugs)) {
                 $asset->deleteWithMessages($this->messages);
@@ -163,7 +163,7 @@ class MenuPages
         $views = $this->fs->getThemeFiles('views/menu-pages');
 
         foreach ($views as $view) {
-            preg_match('/^([a-z0-9-]+)\.php$/', $view->basename, $menuSlugMatch);
+            preg_match('/^([a-z0-9_-]+)\.php$/', $view->basename, $menuSlugMatch);
 
             if ($menuSlugMatch && !in_array($menuSlugMatch[1], $menuSlugs)) {
                 $view->deleteWithMessages($this->messages);
@@ -186,22 +186,20 @@ class MenuPages
         $chunk = [
             'type' => 'menu-page',
             'code' => [
-                "// Register a new menu page (#{$menuPage->id})",
+                "// Register menu page: {$menuPage->menuSlug} (#{$menuPage->id})",
                 "new TW_Menu_Page(",
                 "\tarray(",
             ],
         ];
 
+        $args->add('page_title', "@php:__( '{$menuPage->pageTitle}', '{$this->data->domain}' )");
+        $args->add('menu_title', "@php:__( '{$menuPage->menuTitle}', '{$this->data->domain}' )");
+        $args->add('menu_slug', $menuPage->menuSlug);
+        $args->add('capability', $menuPage->capability);
+
         if ($menuPage->parentSlug) {
             $args->add('parent_slug', $menuPage->parentSlug);
-        }
-
-        $args->add('page_title', $menuPage->pageTitle);
-        $args->add('menu_title', $menuPage->menuTitle);
-        $args->add('capability', $menuPage->capability);
-        $args->add('menu_slug', $menuPage->menuSlug);
-
-        if (!$menuPage->parentSlug) {
+        } else {
             $args->add('icon_url', $menuPage->iconUrl);
         }
 

@@ -74,13 +74,21 @@ class TW_Block {
 	/**
 	 * Adds prefixes to the field keys.
 	 *
-	 * @param  array  $fields
-	 * @param  int    $key_prefix
+	 * @param  array   $fields
+	 * @param  string  $key_prefix
 	 * @return array
 	 */
 	private static function prefix_field_keys( $fields, $key_prefix ) {
 		foreach ( $fields as $i => $field ) {
 			$fields[$i]['key'] = $key_prefix . substr( $field['key'], 6 );
+
+			if ( isset( $field['conditional_logic'] ) ) {
+				foreach ( $field['conditional_logic'] as $j => $group ) {
+					foreach ( $group as $k => $condition ) {
+						$fields[$i]['conditional_logic'][$j][$k]['field'] = $key_prefix . substr( $condition['field'], 6 );
+					}
+				}
+			}
 
 			if ( isset( $field['sub_fields'] ) ) {
 				$fields[$i]['sub_fields'] = static::prefix_field_keys( $field['sub_fields'], $key_prefix );

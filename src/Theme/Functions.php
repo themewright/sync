@@ -189,7 +189,7 @@ class Functions
                         $pattern = '/\/\/ Register block group: [a-z0-9_]+ \(#([0-9]+)\)/';
                         break;
                     case 'menu-page':
-                        $pattern = '/\/\/ Register a new menu page \(#([0-9]+)\)/';
+                        $pattern = '/\/\/ Register menu page: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
                     case 'template':
                         $pattern = '/\/\/ Template specific options: [a-z0-9-]+\.php \(#([0-9]+)\)/';
@@ -211,6 +211,9 @@ class Functions
                         break;
                     case 'ajax':
                         $pattern = '/\/\/ Add Ajax: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
+                    case 'options-page':
+                        $pattern = '/\/\/ Register options page: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
                     default:
                         $pattern = null;
@@ -251,7 +254,7 @@ class Functions
             return 'block';
         } else if (strpos($code, '// Register block group') === 0) {
             return 'block-group';
-        } else if (strpos($code, '// Register a new menu page') === 0) {
+        } else if (strpos($code, '// Register menu page') === 0) {
             return 'menu-page';
         } else if (strpos($code, '// Template specific options') === 0) {
             return 'template';
@@ -267,6 +270,8 @@ class Functions
             return 'action';
         } else if (strpos($code, '// Add Ajax') === 0) {
             return 'ajax';
+        } else if (strpos($code, '// Register options page') === 0) {
+            return 'options-page';
         } else {
             return false;
         }

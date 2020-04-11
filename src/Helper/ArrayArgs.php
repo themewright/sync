@@ -5,11 +5,11 @@ namespace ThemeWright\Sync\Helper;
 class ArrayArgs
 {
     /**
-     * The array arguments object.
+     * The arguments array.
      *
-     * @var object
+     * @var array
      */
-    private $args = [];
+    public $args = [];
 
     /**
      * The character count of the longest key of all arguments.
@@ -80,12 +80,19 @@ class ArrayArgs
      * Removes an array argument.
      *
      * @param  string  $key
+     * @param  boolean  $recursive
      * @return ThemeWright\Sync\Helper\ArrayArgs
      */
-    public function remove(string $key)
+    public function remove(string $key, $recursive = false)
     {
-        if (isset($this->args[$key])) {
-            unset($this->args[$key]);
+        unset($this->args[$key]);
+
+        if ($recursive) {
+            foreach ($this->args as $arg) {
+                if (is_object($arg->value) && is_a($arg->value, 'ThemeWright\Sync\Helper\ArrayArgs')) {
+                    $arg->value->remove($key, true);
+                }
+            }
         }
 
         return $this;

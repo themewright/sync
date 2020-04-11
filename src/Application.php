@@ -18,6 +18,7 @@ use ThemeWright\Sync\Theme\Includes;
 use ThemeWright\Sync\Theme\JsModules;
 use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
+use ThemeWright\Sync\Theme\OptionsPages;
 use ThemeWright\Sync\Theme\Parts;
 use ThemeWright\Sync\Theme\PostTypes;
 use ThemeWright\Sync\Theme\Scripts;
@@ -110,6 +111,7 @@ class Application
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new BlockGroups($data, $functions, $messages))->build();
             (new MenuPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new OptionsPages($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Templates($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new Parts($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new ScssPartials($themeDir, $data, $stylesScss, $messages))->deleteExceptData()->build();
@@ -213,6 +215,11 @@ class Application
                     break;
                 case 'ajax':
                     (new Ajaxes($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'options-page':
+                    (new OptionsPages($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
                     break;

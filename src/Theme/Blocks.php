@@ -4,7 +4,9 @@ namespace ThemeWright\Sync\Theme;
 
 use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Component\Field;
+use ThemeWright\Sync\Component\FieldGroup;
 use ThemeWright\Sync\Filesystem\Filesystem;
+use ThemeWright\Sync\Helper\ArrayArgs;
 use ThemeWright\Sync\Helper\Str;
 
 class Blocks
@@ -152,18 +154,26 @@ class Blocks
             "\tarray(",
         ];
 
+        $fields = new ArrayArgs();
+
         foreach ($block->fields as $fieldArgs) {
             if (isset($fieldArgs->fieldSet)) {
                 $i = array_search($fieldArgs->fieldSet, array_column($block->fieldSets, 'id'));
 
                 foreach ($block->fieldSets[$i]->fields as $fieldSetFieldArgs) {
-                    $php[] = (new Field($fieldSetFieldArgs, $block->fieldSets))->build(2);
+                    $field = (new Field($fieldSetFieldArgs, $block->fieldSets))->build(2, 'field_', 'ArrayArgs');
+                    $fields->add('', $field);
                 }
             } else {
-                $php[] = (new Field($fieldArgs, $block->fieldSets))->build(2);
+                $field = (new Field($fieldArgs, $block->fieldSets))->build(2, 'field_', 'ArrayArgs');
+                $fields->add('', $field);
             }
         }
 
+        FieldGroup::fixConditionalLogics($fields);
+        $fields->remove('tw_key', true)->remove('auto_name', true);
+
+        $php[] = implode(PHP_EOL, $fields->format(2));
         $php[] = "\t)";
         $php[] = ");";
 

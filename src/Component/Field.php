@@ -25,6 +25,7 @@ class Field
      * Handles an ACF field.
      *
      * @param  mixed  $args
+     * @param  mixed  $fieldSets
      * @return void
      */
     public function __construct($args, $fieldSets)
@@ -39,7 +40,7 @@ class Field
      * @param  int  $indent
      * @param  string  $keyPrefix
      * @param  string  $return
-     * @return string
+     * @return mixed
      */
     public function build(int $indent = 0, $keyPrefix = 'field_', $return = 'string')
     {
@@ -77,13 +78,15 @@ class Field
                     }
 
                     $args->add($snakeKey, $subFields);
+                } else if ($snakeKey == 'conditional_logic') {
+                    $args->add($snakeKey, json_decode(json_encode($value), true));
                 } else {
                     $args->add($snakeKey, $value);
                 }
             }
         }
 
-        $args->remove('tw_key')->asort();
+        $args->asort();
 
         $lines = [
             str_repeat("\t", $indent) . "array(",
