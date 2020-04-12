@@ -78,7 +78,7 @@ class Field
                     }
 
                     $args->add($snakeKey, $subFields);
-                } else if ($snakeKey == 'conditional_logic') {
+                } else if ($snakeKey == 'conditional_logic' || $snakeKey == 'wrapper') {
                     $args->add($snakeKey, json_decode(json_encode($value), true));
                 } else {
                     $args->add($snakeKey, $value);
