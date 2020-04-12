@@ -215,6 +215,9 @@ class Functions
                     case 'options-page':
                         $pattern = '/\/\/ Register options page: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
+                    case 'php-file':
+                        $pattern = '/\/\/ Include file: [a-zA-Z0-9_-]+\.php \(#([0-9]+)\)/';
+                        break;
                     default:
                         $pattern = null;
                         break;
@@ -272,6 +275,8 @@ class Functions
             return 'ajax';
         } else if (strpos($code, '// Register options page') === 0) {
             return 'options-page';
+        } else if (strpos($code, '// Include file') === 0) {
+            return 'php-file';
         } else {
             return false;
         }

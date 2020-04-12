@@ -20,6 +20,7 @@ use ThemeWright\Sync\Theme\MainJs;
 use ThemeWright\Sync\Theme\MenuPages;
 use ThemeWright\Sync\Theme\OptionsPages;
 use ThemeWright\Sync\Theme\Parts;
+use ThemeWright\Sync\Theme\PhpFiles;
 use ThemeWright\Sync\Theme\PostTypes;
 use ThemeWright\Sync\Theme\Scripts;
 use ThemeWright\Sync\Theme\ScssPartials;
@@ -106,6 +107,7 @@ class Application
             $mainJs->emptyModules();
             (new Includes($themeDir, $functions, $messages))->build();
             (new Bundlers($themeDir, $data, $messages))->build();
+            (new PhpFiles($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new PostTypes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Taxonomies($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
@@ -220,6 +222,11 @@ class Application
                     break;
                 case 'options-page':
                     (new OptionsPages($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'php-file':
+                    (new PhpFiles($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
                     break;
