@@ -104,10 +104,6 @@ class Request
             $errors[] = "The 'commit' parameter is required";
         }
 
-        if (is_null($this->get('bundlers'))) {
-            $errors[] = "The 'bundlers' parameter is required";
-        }
-
         // @todo
         // if (is_null($this->get('version'))) {
         //     $errors[] = "The 'version' parameter is required";

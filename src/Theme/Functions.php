@@ -218,6 +218,9 @@ class Functions
                     case 'php-file':
                         $pattern = '/\/\/ Include file: [a-zA-Z0-9_-]+\.php \(#([0-9]+)\)/';
                         break;
+                    case 'configuration-file':
+                        $pattern = '/\/\/ Register configuration file: [a-zA-Z0-9_\-\.]+\.(?:json|js) \(#([0-9]+)\)/';
+                        break;
                     default:
                         $pattern = null;
                         break;
@@ -277,6 +280,8 @@ class Functions
             return 'options-page';
         } else if (strpos($code, '// Include file') === 0) {
             return 'php-file';
+        } else if (strpos($code, '// Register configuration file') === 0) {
+            return 'configuration-file';
         } else {
             return false;
         }

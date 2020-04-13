@@ -11,7 +11,7 @@ use ThemeWright\Sync\Theme\Actions;
 use ThemeWright\Sync\Theme\Ajaxes;
 use ThemeWright\Sync\Theme\BlockGroups;
 use ThemeWright\Sync\Theme\Blocks;
-use ThemeWright\Sync\Theme\Bundlers;
+use ThemeWright\Sync\Theme\ConfigurationFiles;
 use ThemeWright\Sync\Theme\Filters;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
@@ -106,8 +106,8 @@ class Application
             $stylesScss->emptyPartials();
             $mainJs->emptyModules();
             (new Includes($themeDir, $functions, $messages))->build();
-            (new Bundlers($themeDir, $data, $messages))->build();
             (new PhpFiles($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new ConfigurationFiles($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new PostTypes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Taxonomies($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Blocks($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
@@ -155,10 +155,6 @@ class Application
                 case 'menu-page':
                     (new MenuPages($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
-                    $stylesheet->build($time);
-                    break;
-                case 'bundlers':
-                    (new Bundlers($themeDir, $data, $messages))->build();
                     $stylesheet->build($time);
                     break;
                 case 'template':
@@ -227,6 +223,11 @@ class Application
                     break;
                 case 'php-file':
                     (new PhpFiles($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'configuration-file':
+                    (new ConfigurationFiles($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
                     break;

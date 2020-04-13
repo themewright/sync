@@ -64,15 +64,15 @@ class PhpFiles
             $oldChunk = $this->functions->getChunk($chunk);
 
             if ($oldChunk) {
-                preg_match('/\/\/ Include file: ([a-zA-Z0-9_-]+\.php) \(#[0-9]+\)/', $oldChunk['code'], $oldNameMatch);
+                preg_match('/\/\/ Include file: ([a-zA-Z0-9_-]+\.php) \(#[0-9]+\)/', $oldChunk['code'], $oldFilenameMatch);
 
-                // Delete old files if the name changed
-                if ($oldNameMatch && $oldNameMatch[1] != $phpFile->name) {
-                    $this->fs->file('includes/custom/' . $oldNameMatch[1])->deleteWithMessages($this->messages);
+                // Delete old files if the filename changed
+                if ($oldFilenameMatch && $oldFilenameMatch[1] != $phpFile->filename) {
+                    $this->fs->file('includes/custom/' . $oldFilenameMatch[1])->deleteWithMessages($this->messages);
                 }
             }
 
-            $file = $this->fs->file('includes/custom/' . $phpFile->name);
+            $file = $this->fs->file('includes/custom/' . $phpFile->filename);
 
             $file->setContent($phpFile->php)->doubleSpacesToTabs()->saveWithMessages($this->messages);
 
@@ -89,14 +89,14 @@ class PhpFiles
      */
     public function deleteExceptData()
     {
-        $names = array_column($this->data->phpFiles, 'name');
+        $filenames = array_column($this->data->phpFiles, 'filename');
 
         $fields = $this->fs->getThemeFiles('includes/custom');
 
         foreach ($fields as $field) {
             preg_match('/^([a-zA-Z0-9_-]+\.php)$/', $field->basename, $nameMatch);
 
-            if ($nameMatch && !in_array($nameMatch[1], $names)) {
+            if ($nameMatch && !in_array($nameMatch[1], $filenames)) {
                 $field->deleteWithMessages($this->messages);
             }
         }
@@ -117,12 +117,12 @@ class PhpFiles
         $chunk = [
             'type' => 'php-file',
             'code' => [
-                "// Include file: {$phpFile->name} (#{$phpFile->id})",
+                "// Include file: {$phpFile->filename} (#{$phpFile->id})",
             ],
         ];
 
         if ($phpFile->include) {
-            $chunk['code'][] = "include get_template_directory() . '/includes/custom/{$phpFile->name}';";
+            $chunk['code'][] = "include get_template_directory() . '/includes/custom/{$phpFile->filename}';";
         }
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);
