@@ -115,11 +115,22 @@ class Stylesheet
             $newContent[] = 'Tags: ' . $this->data->tags;
         }
 
-        $newContent[] = 'Author: xxx'; // @todo
-        $newContent[] = 'Author URI: xxx'; // @todo
-        $newContent[] = 'Theme URI: xxx'; // @todo
+        $newContent[] = 'Author: ' . $this->data->tags;
+
+        if ($this->data->authorUri) {
+            $newContent[] = 'Author URI: ' . $this->data->authorUri;
+        }
+
+        if ($this->data->themeUri) {
+            $newContent[] = 'Theme URI: ' . $this->data->themeUri;
+        }
+
         $newContent[] = 'License: ' . $this->data->license;
-        $newContent[] = 'License URI: ' . $this->data->licenseUri;
+
+        if ($this->data->licenseUri) {
+            $newContent[] = 'License URI: ' . $this->data->licenseUri;
+        }
+
         $newContent[] = 'TWID: ' . $this->data->id;
         $newContent[] = 'TWCID: ' . $this->data->commit;
         $newContent[] = '*/';
