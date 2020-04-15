@@ -96,14 +96,14 @@ class ConfigurationFiles
                     '{{ TW_THEME_SLUG }}',
                     '{{ TW_THEME_VERSION }}',
                     '{{ TW_THEME_DESCRIPTION }}',
-                    '{{ TW_ORGANIZATION_NAME }}',
+                    '{{ TW_THEME_AUTHOR }}',
                     '{{ TW_WP_URL }}',
                 ],
                 [
                     $this->themeSlug,
                     $this->data->version,
                     $this->data->description,
-                    $this->data->organization->name,
+                    $this->data->author,
                     $this->wpUrl,
                 ],
                 $configurationFile->content
