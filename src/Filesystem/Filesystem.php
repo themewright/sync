@@ -120,6 +120,36 @@ class Filesystem
     }
 
     /**
+     * Removes empty subdirectories in a theme directory.
+     *
+     * @param  string  $path
+     * @param  bool  $fullPath
+     * @return boolean
+     */
+    public function removeEmptyThemeSubdirectories(string $path, bool $fullPath = false)
+    {
+        if (!$fullPath) {
+            $path = $this->themeDir . '/' . $path;
+        }
+
+        if (!is_dir($path)) {
+            return false;
+        }
+
+        $empty = true;
+
+        foreach (scandir($path) as $file) {
+            if ($file == '.DS_Store') {
+                unlink($path . '/.DS_Store');
+            } else if ($file != '.' && $file != '..' && (!is_dir($path . '/' . $file) || !$this->removeEmptyThemeSubdirectories($path . '/' . $file, true))) {
+                $empty = false;
+            }
+        }
+
+        return $empty && rmdir($path);
+    }
+
+    /**
      * Lists all files in a theme subdirectory.
      *
      * @param  string  $subdir

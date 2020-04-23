@@ -9,6 +9,7 @@ use ThemeWright\Sync\Http\Request;
 use ThemeWright\Sync\Http\Response;
 use ThemeWright\Sync\Theme\Actions;
 use ThemeWright\Sync\Theme\Ajaxes;
+use ThemeWright\Sync\Theme\Assets;
 use ThemeWright\Sync\Theme\BlockGroups;
 use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\ConfigurationFiles;
@@ -121,6 +122,7 @@ class Application
             (new Filters($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Actions($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Ajaxes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Assets($themeDir, $data, $messages))->build();
             (new Styles($themeDir, $data, $functions))->build();
             (new Scripts($themeDir, $data, $functions))->build();
             $functions->build();
