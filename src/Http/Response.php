@@ -33,7 +33,7 @@ class Response
         $this->response->headers->set('Content-Type', 'application/json');
         $this->response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
         $this->response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        $this->response->headers->set('Access-Control-Allow-Origin', '*'); // @todo limit
+        $this->response->headers->set('Access-Control-Allow-Origin', isset($_ENV['CORS']) ? $_ENV['CORS'] : 'https://app.themewright.com');
 
         $this->data = array_merge($data, ['messages' => []]);
     }
