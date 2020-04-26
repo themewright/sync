@@ -38,7 +38,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.0.1';
+    public static $version = '1.0.0';
 
     /**
      * The Request instance.
@@ -54,9 +54,6 @@ class Application
      */
     public function __construct()
     {
-        // Get request parameters
-        $this->request = new Request();
-
         // Load .env if it exists
         if (file_exists(__DIR__ . '/../../../../.env')) {
             (new Dotenv())->load(__DIR__ . '/../../../../.env');
@@ -64,6 +61,9 @@ class Application
 
         // Log errors
         ini_set('error_log', __DIR__ . '/../error.log');
+
+        // Get request parameters
+        $this->request = new Request();
     }
 
     /**
@@ -80,7 +80,7 @@ class Application
         $errors = $this->request->validate();
 
         if ($errors) {
-            (new Response())->addMany($errors)->send(400);
+            (new Response())->addMany($errors)->send();
         }
 
         $action = $this->request->getAction();

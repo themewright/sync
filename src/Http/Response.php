@@ -2,17 +2,8 @@
 
 namespace ThemeWright\Sync\Http;
 
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-
 class Response
 {
-    /**
-     * The Response instance.
-     *
-     * @var \Symfony\Component\HttpFoundation\Response
-     */
-    protected $response;
-
     /**
      * The response array.
      *
@@ -21,20 +12,13 @@ class Response
     protected $data;
 
     /**
-     * Builds a wrapper for the Symfony Response.
+     * Builds a JSONP response wrapper.
      *
      * @param  array  $data
      * @return void
      */
     public function __construct(array $data = [])
     {
-        $this->response = new SymfonyResponse();
-
-        $this->response->headers->set('Content-Type', 'application/json');
-        $this->response->headers->set('Access-Control-Allow-Headers', 'Content-Type');
-        $this->response->headers->set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        $this->response->headers->set('Access-Control-Allow-Origin', isset($_ENV['CORS']) ? $_ENV['CORS'] : 'https://app.themewright.com');
-
         $this->data = array_merge($data, ['messages' => []]);
     }
 
@@ -63,14 +47,17 @@ class Response
     }
 
     /**
-     * Sends the respond JSON and exits the script.
+     * Sends the respond JSONP and exits the script.
      *
-     * @param  int  $status
      * @return string
      */
-    public function send(int $status = 200)
+    public function send()
     {
-        $this->response->setContent(json_encode($this->data))->setStatusCode($status)->send();
+        $callback = $_GET['callback'] ?? 'callback';
+        $json = json_encode($this->data);
+
+        echo "{$callback}($json);";
+
         exit;
     }
 }

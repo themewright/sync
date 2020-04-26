@@ -2,17 +2,8 @@
 
 namespace ThemeWright\Sync\Http;
 
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
-
 class Request
 {
-    /**
-     * The Request instance.
-     *
-     * @var \Symfony\Component\HttpFoundation\Request
-     */
-    protected $request;
-
     /**
      * The JSON object from the request.
      *
@@ -21,28 +12,22 @@ class Request
     protected $json;
 
     /**
-     * Builds a wrapper for the Symfony Requests to handle JSON data more efficient.
+     * Builds a HTTP request wrapper.
      *
      * @return void
      */
     public function __construct()
     {
-        $this->request = new SymfonyRequest(
-            $_GET,
-            $_POST,
-            [],
-            $_COOKIE,
-            $_FILES,
-            $_SERVER
-        );
+        $hash = $_GET['hash'] ?? null;
 
-        if ($this->request->server->get('REQUEST_METHOD') == 'OPTIONS') {
-            (new Response())->send();
-        } else if ($this->request->server->get('REQUEST_METHOD') != 'POST') {
-            (new Response())->add('Method not allowed')->send(405);
+        if (!ctype_alnum($hash)) {
+            (new Response())->add('Invalid hash.')->send();
         }
 
-        $this->json = json_decode($this->request->getContent());
+        $jsonUrl = isset($_ENV['TW_JSON_URL']) ? $_ENV['TW_JSON_URL'] . "/{$hash}.json" : "https://json.themewright.com/{$hash}.json";
+        $json = file_get_contents($jsonUrl);
+
+        $this->json = json_decode($json);
     }
 
     /**
@@ -84,7 +69,7 @@ class Request
      */
     public function getAction()
     {
-        return $this->request->query->get('action');
+        return $_GET['action'] ?? null;
     }
 
     /**
@@ -104,10 +89,9 @@ class Request
             $errors[] = "The 'commit' parameter is required";
         }
 
-        // @todo
-        // if (is_null($this->get('version'))) {
-        //     $errors[] = "The 'version' parameter is required";
-        // }
+        if (is_null($this->get('version'))) {
+            $errors[] = "The 'version' parameter is required";
+        }
 
         return $errors;
     }
