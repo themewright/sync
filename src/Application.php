@@ -62,8 +62,33 @@ class Application
         // Log errors
         ini_set('error_log', __DIR__ . '/../error.log');
 
+        // Check version
+        $this->checkVersion();
+
         // Get request parameters
         $this->request = new Request();
+    }
+
+    private function checkVersion()
+    {
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => [
+                    'User-Agent: PHP',
+                ],
+            ],
+        ]);
+
+        $version = static::$version;
+        $latest = json_decode(file_get_contents('https://api.github.com/repos/themewright/sync/releases/latest', false, $context));
+
+        if ($latest->tag_name > $version) {
+            (new Response())->addMany([
+                "Error: Outdated client version ({$version} &rarr; {$latest->tag_name})",
+                "Run `composer update` to get the latest version",
+            ])->send();
+        }
     }
 
     /**
@@ -74,8 +99,6 @@ class Application
     public function run()
     {
         $time = microtime(true);
-
-        // @todo compare versions of tw/sync from request and this version
 
         $errors = $this->request->validate();
 
@@ -130,7 +153,6 @@ class Application
             $mainJs->build();
             $stylesheet->build($time);
         } else if ($commit - 1 == $stylesheet->get('commit')) {
-            // Doing partially only when 1 commit difference
             switch ($action) {
                 case 'post-type':
                     (new PostTypes($themeDir, $data, $functions, $messages))->build();
