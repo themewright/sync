@@ -60,7 +60,7 @@ class ConfigurationFiles
      */
     public function __construct(string $themeDir, &$data, &$functions, &$messages = [])
     {
-        $this->wpUrl = $_ENV['TW_WP_URL'] ?? explode('/sync/webhook.php', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])[0];
+        $this->wpUrl = $_ENV['TW_WP_URL'] ?? explode('/vendor/themewright/sync/webhook.php', (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'])[0];
         $this->themeSlug = preg_split('/\/\\\/', $themeDir);
         $this->themeSlug = end($this->themeSlug);
         $this->fs = new Filesystem($themeDir);
