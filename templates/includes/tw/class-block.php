@@ -61,7 +61,7 @@ class TW_Block {
 	 * @return void
 	 */
 	public static function render( $data ) {
-		global $postmeta, $option;
+		global $postmeta, $_postmeta, $option;
 		
 		$name  = $data['acf_fc_layout'] ?? false;
 		$field = (object) $data;

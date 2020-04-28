@@ -271,7 +271,7 @@ class Element
                 return $this->parsePartElement($indent);
             case 'blockGroup':
                 return $this->parseBlockGroupElement($indent);
-            case 'text':
+            case 'none':
                 return $this->parseTextElement($indent);
             default:
                 return [];
@@ -335,7 +335,7 @@ class Element
 
                 $attributesAttr = ' ' . implode(' ', $attributesAttr);
             } else {
-                $attributesAttr = ' <?php echo apply_filters( \'tw_key_value_to_attributes\', $atts ); ?' . '>';
+                $attributesAttr = ' <?php echo tw_element_attributes( $atts ); ?' . '>';
 
                 if (!$this->classes || $classesInline) {
                     $lines[] = str_repeat("\t", $indent) . '<?php';

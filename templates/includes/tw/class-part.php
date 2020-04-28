@@ -30,6 +30,8 @@ class TW_Part {
 	 */
 	public static function render( $name, $args = array() ) {
 		if ( isset( static::$parts[$name] ) ) {
+			global $postmeta, $_postmeta, $option;
+
 			$final_args = array();
 
 			foreach ( static::$parts[$name] as $arg => $default ) {
