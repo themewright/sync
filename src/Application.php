@@ -38,7 +38,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '1.0.0';
+    public static $version = '1.0.1';
 
     /**
      * The Request instance.
@@ -69,6 +69,11 @@ class Application
         $this->request = new Request();
     }
 
+    /**
+     * Checks if there a newer version of the package.
+     *
+     * @return void
+     */
     private function checkVersion()
     {
         $context = stream_context_create([

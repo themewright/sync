@@ -50,6 +50,13 @@ class Includes
      */
     public function build()
     {
+        $screenshot = $this->fs->file('screenshot.png');
+
+        if (!$screenshot->exists()) {
+            $screenshotContent = file_get_contents(__DIR__ . '/../../templates/screenshot.png');
+            $screenshot->setContent($screenshotContent)->saveWithMessages($this->messages);
+        }
+
         $sourcePaths = glob(__DIR__ . '/../../templates/includes/tw/*.php');
 
         $files = [];
