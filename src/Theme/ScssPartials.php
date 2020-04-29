@@ -69,7 +69,7 @@ class ScssPartials
             }
 
             $scss = $this->fs->file('assets/scss/partials/_' . $scssPartial->name . '.scss');
-            $scss->setContent($scssPartial->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $scss->setContent($scssPartial->scss)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->stylesScss->addPartial('partials/' . $scssPartial->name, $scssPartial->id, $scssPartial->priority);
         }

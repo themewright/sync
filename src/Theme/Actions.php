@@ -74,12 +74,7 @@ class Actions
 
             $file = $this->fs->file('includes/actions/action-' . Str::slug($action->name) . '.php');
 
-            $fileContent = [
-                "<?php",
-                $action->php,
-            ];
-
-            $file->setContent($fileContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($action->php)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

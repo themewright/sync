@@ -105,7 +105,7 @@ class Blocks
             $fields->setContent($fieldsContent)->saveWithMessages($this->messages);
 
             if ($block->scss) {
-                $scss->setContent($block->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $scss->setContent($block->scss)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->stylesScss->addPartial('blocks/' . $slug);
             } else {
                 $scss->deleteWithMessages($this->messages);
@@ -113,7 +113,7 @@ class Blocks
             }
 
             if ($block->js) {
-                $js->setContent($block->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $js->setContent($block->js)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->mainJs->addModule('./blocks/' . $slug);
             } else {
                 $js->deleteWithMessages($this->messages);
@@ -130,7 +130,7 @@ class Blocks
                 $viewContent = implode(PHP_EOL, $elements);
             }
 
-            $view->setContent($viewContent)->saveWithMessages($this->messages);
+            $view->setContent($viewContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

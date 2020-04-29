@@ -139,13 +139,13 @@ class File
     }
 
     /**
-     * Converts the indents from double spaces to tabs.
+     * Converts the indents from spaces to tabs.
      *
      * @return \ThemeWright\Sync\Filesystem\File
      */
-    public function doubleSpacesToTabs()
+    public function spacesToTabs()
     {
-        $this->newContent = preg_replace('/^ {2}|\G {2}/Sm', "\t", $this->newContent);
+        $this->newContent = preg_replace('/^ {4}|\G {4}/Sm', "\t", $this->newContent);
         return $this;
     }
 

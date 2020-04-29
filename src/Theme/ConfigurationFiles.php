@@ -109,7 +109,7 @@ class ConfigurationFiles
                 $configurationFile->content
             );
 
-            $file->setContent($fileContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($fileContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

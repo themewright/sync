@@ -95,7 +95,7 @@ class Parts
             $js = $this->fs->file('assets/js/parts/' . $part->name . '.js');
 
             if ($part->scss) {
-                $scss->setContent($part->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $scss->setContent($part->scss)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->stylesScss->addPartial('parts/' . $part->name);
             } else {
                 $scss->deleteWithMessages($this->messages);
@@ -103,7 +103,7 @@ class Parts
             }
 
             if ($part->js) {
-                $js->setContent($part->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $js->setContent($part->js)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->mainJs->addModule('./parts/' . $part->name);
             } else {
                 $js->deleteWithMessages($this->messages);
@@ -120,7 +120,7 @@ class Parts
                 $fileContent = implode(PHP_EOL, $elements);
             }
 
-            $file->setContent($fileContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($fileContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

@@ -126,7 +126,7 @@ class Templates
             }
 
             if ($template->scss) {
-                $scss->setContent($template->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $scss->setContent($template->scss)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->stylesScss->addPartial('templates/' . $template->name);
             } else {
                 $scss->deleteWithMessages($this->messages);
@@ -134,7 +134,7 @@ class Templates
             }
 
             if ($template->js) {
-                $js->setContent($template->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $js->setContent($template->js)->spacesToTabs()->saveWithMessages($this->messages);
                 $this->mainJs->addModule('./templates/' . $template->name);
             } else {
                 $js->deleteWithMessages($this->messages);
@@ -155,7 +155,7 @@ class Templates
                 $viewContent = "<?php /* Template name: {$template->name} */ ?" . ">" . PHP_EOL . $viewContent;
             }
 
-            $view->setContent($viewContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $view->setContent($viewContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

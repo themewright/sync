@@ -376,7 +376,7 @@ class Element
         }
 
         // One line formatting
-        if (count($this->text) == 1) {
+        if (count($lines) == 3) {
             $lines = array_map(function ($line) {
                 return trim($line);
             }, $lines);
@@ -498,19 +498,25 @@ class Element
 
     /**
      * Converts and indents PHP code from the class arguments to an array of strings.
+     * Removes main PHP opening and closing tags.
      *
      * @param string $argKey
      * @return string[]
      */
     protected function formatArgsPhp(string $argKey)
     {
-        $lines = isset($this->args->$argKey->php) ? explode(PHP_EOL, $this->args->$argKey->php) : [];
+        $lines = [];
+        $input = isset($this->args->$argKey->php) ? explode(PHP_EOL, $this->args->$argKey->php) : [];
 
-        return array_map(function ($line) {
-            $line = preg_replace('/^(\s*) {2}(\s*)/', "$1\t$2", $line);
-            $line = preg_replace('/^(\t*)[ ]+/', "$1", $line);
+        foreach ($input as $line) {
+            if (!in_array(trim($line, ' '), ['<?php', '?' . '>'])) {
+                $line = preg_replace('/^ {4}|\G {4}/Sm', "\t", $line);
+                $line = preg_replace('/^(\t*)[ ]+/', "$1", $line);
+                $line = preg_replace('/^\s*<\?php\s*(.*?)\s*\?\>\s*$/', "$1", $line);
+                $lines[] = $line;
+            }
+        }
 
-            return $line;
-        }, $lines);
+        return $lines;
     }
 }

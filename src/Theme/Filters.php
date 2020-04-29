@@ -74,12 +74,7 @@ class Filters
 
             $file = $this->fs->file('includes/filters/filter-' . Str::slug($filter->name) . '.php');
 
-            $fileContent = [
-                "<?php",
-                $filter->php,
-            ];
-
-            $file->setContent($fileContent)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($filter->php)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

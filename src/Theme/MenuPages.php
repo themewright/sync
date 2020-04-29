@@ -82,7 +82,7 @@ class MenuPages
             $view = $this->fs->file('views/menu-pages/' . $menuPage->menuSlug . '.php');
 
             if ($menuPage->scss) {
-                $scss->setContent($menuPage->scss)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $scss->setContent($menuPage->scss)->spacesToTabs()->saveWithMessages($this->messages);
             } else {
                 $css->deleteWithMessages($this->messages);
                 $cssMap->deleteWithMessages($this->messages);
@@ -90,7 +90,7 @@ class MenuPages
             }
 
             if ($menuPage->js) {
-                $mjs->setContent($menuPage->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+                $mjs->setContent($menuPage->js)->spacesToTabs()->saveWithMessages($this->messages);
             } else {
                 $mjs->deleteWithMessages($this->messages);
                 $js->deleteWithMessages($this->messages);
@@ -107,7 +107,7 @@ class MenuPages
                 $viewContent = implode(PHP_EOL, $elements);
             }
 
-            $view->setContent($viewContent)->saveWithMessages($this->messages);
+            $view->setContent($viewContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }

@@ -69,7 +69,7 @@ class JsModules
             }
 
             $js = $this->fs->file('assets/js/modules/' . $jsModule->name . '.js');
-            $js->setContent($jsModule->js)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $js->setContent($jsModule->js)->spacesToTabs()->saveWithMessages($this->messages);
 
             if ($jsModule->import) {
                 $this->mainJs->addModule('./modules/' . $jsModule->name, $jsModule->id, $jsModule->priority);

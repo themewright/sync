@@ -74,7 +74,7 @@ class PhpFiles
 
             $file = $this->fs->file('includes/custom/' . $phpFile->filename);
 
-            $file->setContent($phpFile->php)->doubleSpacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($phpFile->php)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
