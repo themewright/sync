@@ -28,5 +28,5 @@ function tw_element_attributes( $atts ) {
 		$html[] = $key . '="' . $value . '"';
 	}
 
-	echo implode( ' ', $html );
+	return implode( ' ', $html );
 }
