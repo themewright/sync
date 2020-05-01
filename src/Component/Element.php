@@ -376,7 +376,7 @@ class Element
         }
 
         // One line formatting
-        if (count($lines) == 3) {
+        if (count($lines) == 3 && !$this->children) {
             $lines = array_map(function ($line) {
                 return trim($line);
             }, $lines);
