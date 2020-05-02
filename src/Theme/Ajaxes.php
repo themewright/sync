@@ -74,12 +74,7 @@ class Ajaxes
 
             $file = $this->fs->file('includes/ajax/ajax-' . Str::slug($ajax->action) . '.php');
 
-            $fileContent = [
-                "<?php",
-                $ajax->php,
-            ];
-
-            $file->setContent($fileContent)->spacesToTabs()->saveWithMessages($this->messages);
+            $file->setContent($ajax->php)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
