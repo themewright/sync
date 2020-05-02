@@ -23,14 +23,14 @@ class TW_Block {
 			if ( isset( static::$blocks[$block_name] ) ) {
 				$layouts[] = array(
 					'key'        => 'field_block_group_' . $block_group['id'] . '_' . $block_name,
-					'label'      => static::$blocks[$block_name]['label'],
-					'layout'     => 'row',
 					'name'       => $block_name,
+					'label'      => static::$blocks[$block_name]['label'],
+					'type'       => 'layout',
+					'display'    => 'row',
 					'sub_fields' => static::prefix_field_keys(
 						static::$blocks[$block_name]['fields'],
 						'field_block_group_' . $block_group['id'] . '_' . $block_name . '__'
 					),
-					'type'       => 'layout',
 				);
 			}
 		}

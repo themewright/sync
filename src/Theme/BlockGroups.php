@@ -57,10 +57,14 @@ class BlockGroups
                 'code' => [
                     "// Register block group: {$blockGroup->name} (#{$blockGroup->id})",
                     "TW_Block_Group::register(",
-                    "\t{$blockGroup->id},",
-                    "\t__( '{$blockGroup->label}', '{$this->data->domain}' ),",
-                    "\t'{$blockGroup->name}',",
-                    "\tarray( {$blockList} )",
+                    "\tarray(",
+                    "\t\t'id'           => {$blockGroup->id},",
+                    "\t\t'label'        => __( '{$blockGroup->label}', '{$this->data->domain}' ),",
+                    "\t\t'name'         => '{$blockGroup->name}',",
+                    "\t\t'blocks'       => array( {$blockList} ),",
+                    "\t\t'button_label' => __( '{$blockGroup->buttonLabel}', '{$this->data->domain}' ),",
+                    "\t\t'menu_order'   => {$blockGroup->menuOrder},",
+                    "\t)",
                     ");",
                 ],
             ];

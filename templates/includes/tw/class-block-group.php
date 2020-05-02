@@ -20,23 +20,15 @@ class TW_Block_Group {
 	/**
 	 * Registers a new block group.
 	 *
-	 * @param  int     $id
-	 * @param  string  $label
-	 * @param  string  $name
-	 * @param  array   $blocks
+	 * @param  array  $args
 	 * @return void
 	 */
-	public static function register( $id, $label, $name, $blocks ) {
+	public static function register( $args ) {
 		if ( ! static::$block_groups ) {
 			add_action( 'acf/init', 'TW_Block_Group::add_fields' );
 		}
 
-		static::$block_groups[$name] = array(
-			'id'     => $id,
-			'label'  => $label,
-			'name'   => $name,
-			'blocks' => $blocks,
-		);
+		static::$block_groups[$args['name']] = $args;
 	}
 
 	/**
@@ -60,25 +52,34 @@ class TW_Block_Group {
 	 * @return void
 	 */
 	public static function add_fields() {
-		foreach ( static::$block_groups as $block_group ) {
-			acf_add_local_field_group(
-				array(
-					'key'      => 'group_block_group_' . $block_group['id'],
-					'title'    => $block_group['label'],
-					'fields'   => array(
-						array(
-							'key'          => 'field_block_group_' . $block_group['id'],
-							'label'        => $block_group['label'],
-							'name'         => $block_group['name'],
-							'type'         => 'flexible_content',
-							'layouts'      => TW_Block::get( $block_group ),
-							'button_label' => 'Add Block', // @todo make generic $block_group['button_label']
+		if ( function_exists( 'acf_add_local_field_group' ) ) {
+			foreach ( static::$block_groups as $block_group ) {
+				acf_add_local_field_group(
+					array(
+						'key'                  => 'group_block_group_' . $block_group['id'],
+						'title'                => $block_group['label'],
+						'fields'               => array(
+							array(
+								'key'          => 'field_block_group_' . $block_group['id'],
+								'label'        => $block_group['label'],
+								'name'         => $block_group['name'],
+								'type'         => 'flexible_content',
+								'layouts'      => TW_Block::get( $block_group ),
+								'button_label' => $block_group['button_label'],
+							),
 						),
-					),
-					'location' => static::$locations[$block_group['name']] ?? array(),
-					'style'    => 'seamless',
-				)
-			);
+						'location'              => static::$locations[$block_group['name']] ?? array(),
+						'menu_order'            => $block_group['menu_order'],
+						'position'              => 'normal',
+						'style'                 => 'seamless',
+						'label_placement'       => 'top',
+						'instruction_placement' => 'label',
+						'hide_on_screen'        => '',
+						'active'                => true,
+						'description'           => '',
+					)
+				);
+			}
 		}
 	}
 
@@ -89,11 +90,13 @@ class TW_Block_Group {
 	 * @return void
 	 */
 	public static function render( $name ) {
-		$field = get_field( $name );
+		if ( function_exists( 'get_field' ) ) {
+			$field = get_field( $name );
 
-		if ( $field && is_array( $field ) && isset( static::$block_groups[$name] ) ) {
-			foreach ( $field as $data ) {
-				TW_Block::render( $data );
+			if ( $field && is_array( $field ) && isset( static::$block_groups[$name] ) ) {
+				foreach ( $field as $data ) {
+					TW_Block::render( $data );
+				}
 			}
 		}
 	}
