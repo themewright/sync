@@ -326,6 +326,17 @@ class PostTypes
             ],
         ];
 
+        foreach ($postType->blockGroups as $blockGroup) {
+            $chunk['code'][] = "TW_Block_Group::add_location(";
+            $chunk['code'][] = "\t'" . $blockGroup->name . "',";
+            $chunk['code'][] = "\tarray(";
+            $chunk['code'][] = "\t\t'param'    => 'post_type',";
+            $chunk['code'][] = "\t\t'operator' => '==',";
+            $chunk['code'][] = "\t\t'value'    => '{$postType->postType}',";
+            $chunk['code'][] = "\t)";
+            $chunk['code'][] = ");";
+        }
+
         if (in_array($postType->postType, $this->reserved)) {
             $addSupports = [];
             $removeSupports = [];
