@@ -91,13 +91,13 @@ class PhpFiles
     {
         $filenames = array_column($this->data->phpFiles, 'filename');
 
-        $fields = $this->fs->getThemeFiles('includes/custom');
+        $files = $this->fs->getThemeFiles('includes/custom');
 
-        foreach ($fields as $field) {
-            preg_match('/^([a-zA-Z0-9_-]+\.php)$/', $field->basename, $nameMatch);
+        foreach ($files as $file) {
+            preg_match('/^([a-zA-Z0-9_-]+\.php)$/', $file->basename, $nameMatch);
 
             if ($nameMatch && !in_array($nameMatch[1], $filenames)) {
-                $field->deleteWithMessages($this->messages);
+                $file->deleteWithMessages($this->messages);
             }
         }
 

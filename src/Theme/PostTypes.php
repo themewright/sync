@@ -117,11 +117,11 @@ class PostTypes
                 $register->setContent($registerContent)->saveWithMessages($this->messages);
             }
 
-            if ($postType->fields) {
+            if ($postType->fieldGroup->fields) {
                 $fieldGroup = new FieldGroup([
-                    'fields' => $postType->fields,
+                    'fields' => $postType->fieldGroup->fields,
                     'id' => "post_type_{$postType->id}",
-                    'title' => '@todo',
+                    'title' => $postType->fieldGroup->settings->title ?: "@php:__( '{$postType->label} Options', '{$this->data->domain}' )",
                     'location' => [
                         [
                             [
@@ -131,7 +131,11 @@ class PostTypes
                             ],
                         ],
                     ],
-                    'label_placement' => 'left',
+                    'menu_order' => $postType->fieldGroup->settings->menuOrder,
+                    'position' => $postType->fieldGroup->settings->position,
+                    'style' => $postType->fieldGroup->settings->style,
+                    'label_placement' => $postType->fieldGroup->settings->labelPlacement,
+                    'instruction_placement' => $postType->fieldGroup->settings->instructionPlacement,
                 ], $postType->fieldSets);
 
                 $fieldsContent = [
@@ -364,7 +368,7 @@ class PostTypes
             $chunk['code'][] = "include get_template_directory() . '/includes/post-types/register-{$postType->postType}.php';";
         }
 
-        if ($postType->fields) {
+        if ($postType->fieldGroup->fields) {
             $chunk['code'][] = "include get_template_directory() . '/includes/post-types/fields-{$postType->postType}.php';";
         }
 

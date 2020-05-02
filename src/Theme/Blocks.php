@@ -156,11 +156,11 @@ class Blocks
 
         $fields = new ArrayArgs();
 
-        foreach ($block->fields as $fieldArgs) {
+        foreach ($block->fieldGroup->fields as $fieldArgs) {
             if (isset($fieldArgs->fieldSet)) {
                 $i = array_search($fieldArgs->fieldSet, array_column($block->fieldSets, 'id'));
 
-                foreach ($block->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                foreach ($block->fieldSets[$i]->fieldGroup->fields as $fieldSetFieldArgs) {
                     $field = (new Field($fieldSetFieldArgs, $block->fieldSets))->build(2, 'field_', 'ArrayArgs');
                     $fields->add('', $field);
                 }

@@ -89,11 +89,10 @@ class Taxonomies
                 $register->setContent($registerContent)->saveWithMessages($this->messages);
             }
 
-            if ($taxonomy->fields) {
+            if ($taxonomy->fieldGroup->fields) {
                 $fieldGroup = new FieldGroup([
-                    'fields' => $taxonomy->fields,
+                    'fields' => $taxonomy->fieldGroup->fields,
                     'id' => "taxonomy_{$taxonomy->id}",
-                    'title' => '@todo',
                     'location' => [
                         [
                             [
@@ -103,7 +102,6 @@ class Taxonomies
                             ],
                         ],
                     ],
-                    'label_placement' => 'left',
                 ], $taxonomy->fieldSets);
 
                 $fieldsContent = [
@@ -285,7 +283,7 @@ class Taxonomies
             $chunk['code'][] = "include get_template_directory() . '/includes/taxonomies/register-{$taxonomy->taxonomy}.php';";
         }
 
-        if ($taxonomy->fields) {
+        if ($taxonomy->fieldGroup->fields) {
             $chunk['code'][] = "include get_template_directory() . '/includes/taxonomies/fields-{$taxonomy->taxonomy}.php';";
         }
 

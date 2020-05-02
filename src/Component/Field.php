@@ -69,7 +69,7 @@ class Field
                         if (isset($subFieldArgs->fieldSet)) {
                             $i = array_search($subFieldArgs->fieldSet, array_column($this->fieldSets, 'id'));
 
-                            foreach ($this->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                            foreach ($this->fieldSets[$i]->fieldGroup->fields as $fieldSetFieldArgs) {
                                 $subFields[] = (new Field($fieldSetFieldArgs, []))->build($indent + 1, $keyPrefix . $keySuffix . '__', 'ArrayArgs');
                             }
                         } else {

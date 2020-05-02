@@ -76,9 +76,9 @@ class OptionsPages
             $fields = $this->fs->file('includes/options-pages/fields-' . $optionsPage->menuSlug . '.php');
 
             $fieldGroup = new FieldGroup([
-                'fields' => $optionsPage->fields,
+                'fields' => $optionsPage->fieldGroup->fields,
                 'id' => "options_page_{$optionsPage->id}",
-                'title' => '@todo',
+                'title' => $optionsPage->fieldGroup->settings->title ?: "@php:__( '{$optionsPage->pageTitle}', '{$this->data->domain}' )",
                 'location' => [
                     [
                         [
@@ -88,7 +88,11 @@ class OptionsPages
                         ],
                     ],
                 ],
-                'label_placement' => 'left',
+                'menu_order' => $optionsPage->fieldGroup->settings->menuOrder,
+                'position' => $optionsPage->fieldGroup->settings->position,
+                'style' => $optionsPage->fieldGroup->settings->style,
+                'label_placement' => $optionsPage->fieldGroup->settings->labelPlacement,
+                'instruction_placement' => $optionsPage->fieldGroup->settings->instructionPlacement,
             ], $optionsPage->fieldSets);
 
             $fieldsContent = [

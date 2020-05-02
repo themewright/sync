@@ -126,13 +126,13 @@ class ConfigurationFiles
     {
         $filenames = array_column($this->data->configurationFiles, 'filename');
 
-        $fields = $this->fs->getThemeFiles();
+        $files = $this->fs->getThemeFiles();
 
-        foreach ($fields as $field) {
-            preg_match('/^([a-zA-Z0-9_\-\.]+\.(?:json|js))$/', $field->basename, $nameMatch);
+        foreach ($files as $file) {
+            preg_match('/^([a-zA-Z0-9_\-\.]+\.(?:json|js))$/', $file->basename, $nameMatch);
 
             if ($nameMatch && !in_array($nameMatch[1], $filenames)) {
-                $field->deleteWithMessages($this->messages);
+                $file->deleteWithMessages($this->messages);
             }
         }
 

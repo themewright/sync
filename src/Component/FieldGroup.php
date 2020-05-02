@@ -64,7 +64,8 @@ class FieldGroup
         $this->menu_order = $args['menu_order'] ?? 0;
         $this->position = $args['position'] ?? 'normal';
         $this->style = $args['style'] ?? 'default';
-        $this->label_placement = $args['label_placement'] ?? 'top';
+        $this->label_placement = $args['label_placement'] ?? 'left';
+        $this->instruction_placement = $args['instruction_placement'] ?? 'top';
         $this->hide_on_screen = $args['hide_on_screen'] ?? '';
         $this->active = $args['active'] ?? true;
         $this->description = $args['description'] ?? '';
@@ -87,7 +88,7 @@ class FieldGroup
             if (isset($fieldArgs->fieldSet)) {
                 $i = array_search($fieldArgs->fieldSet, array_column($this->fieldSets, 'id'));
 
-                foreach ($this->fieldSets[$i]->fields as $fieldSetFieldArgs) {
+                foreach ($this->fieldSets[$i]->fieldGroup->fields as $fieldSetFieldArgs) {
                     $field = (new Field($fieldSetFieldArgs, $this->fieldSets))->build($indent + 1, "field_{$this->id}_", 'ArrayArgs');
                     $fields->add('', $field);
                 }
@@ -108,6 +109,7 @@ class FieldGroup
         $args->add('position', $this->position);
         $args->add('style', $this->style);
         $args->add('label_placement', $this->label_placement);
+        $args->add('instruction_placement', $this->instruction_placement);
         $args->add('hide_on_screen', $this->hide_on_screen);
         $args->add('active', $this->active);
         $args->add('description', $this->description);

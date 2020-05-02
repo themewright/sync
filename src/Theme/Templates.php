@@ -96,11 +96,11 @@ class Templates
             $scss = $this->fs->file('assets/scss/templates/_' . $template->name . '.scss');
             $js = $this->fs->file('assets/js/templates/' . $template->name . '.js');
 
-            if ($template->type == 'template' && $template->fields) {
+            if ($template->type == 'template' && $template->fieldGroup->fields) {
                 $fieldGroup = new FieldGroup([
-                    'fields' => $template->fields,
+                    'fields' => $template->fieldGroup->fields,
                     'id' => "template_{$template->id}",
-                    'title' => '@todo',
+                    'title' => $template->fieldGroup->settings->title ?: "@php:__( 'Page Options', '{$this->data->domain}' )",
                     'location' => [
                         [
                             [
@@ -110,7 +110,11 @@ class Templates
                             ],
                         ],
                     ],
-                    'label_placement' => 'left',
+                    'menu_order' => $template->fieldGroup->settings->menuOrder,
+                    'position' => $template->fieldGroup->settings->position,
+                    'style' => $template->fieldGroup->settings->style,
+                    'label_placement' => $template->fieldGroup->settings->labelPlacement,
+                    'instruction_placement' => $template->fieldGroup->settings->instructionPlacement,
                 ], $template->fieldSets);
 
                 $fieldsContent = [
@@ -256,7 +260,7 @@ class Templates
             $chunk['code'][] = ");";
         }
 
-        if ($template->type == 'template' && $template->fields) {
+        if ($template->type == 'template' && $template->fieldGroup->fields) {
             $chunk['code'][] = "include get_template_directory() . '/includes/templates/fields-{$template->name}.php';";
         }
 
