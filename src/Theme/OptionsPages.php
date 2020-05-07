@@ -147,8 +147,9 @@ class OptionsPages
             'code' => [
                 "// Register options page: {$optionsPage->menuSlug} (#{$optionsPage->id})",
                 "function tw_options_page_{$optionsPage->id}() {",
-                "\tacf_add_options_page(",
-                "\t\tarray(",
+                "\tif ( function_exists( 'acf_add_options_page' ) ) {",
+                "\t\tacf_add_options_page(",
+                "\t\t\tarray(",
             ],
         ];
 
@@ -169,10 +170,11 @@ class OptionsPages
         $args->add('update_button', "@php:__( '{$optionsPage->updateButton}', '{$this->data->domain}' )");
         $args->add('updated_message', "@php:__( '{$optionsPage->updatedMessage}', '{$this->data->domain}' )");
 
-        $chunk['code'] = array_merge($chunk['code'], $args->format(3));
+        $chunk['code'] = array_merge($chunk['code'], $args->format(4));
 
-        $chunk['code'][] = "\t\t)";
-        $chunk['code'][] = "\t);";
+        $chunk['code'][] = "\t\t\t)";
+        $chunk['code'][] = "\t\t);";
+        $chunk['code'][] = "\t}";
         $chunk['code'][] = "}";
         $chunk['code'][] = "add_action( 'acf/init', 'tw_options_page_{$optionsPage->id}' );";
         $chunk['code'][] = "include get_template_directory() . '/includes/options-pages/fields-{$optionsPage->menuSlug}.php';";
