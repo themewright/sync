@@ -38,7 +38,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '1.1.5';
+    public static $version = '0.9.0';
 
     /**
      * The Request instance.
