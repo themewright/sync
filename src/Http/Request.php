@@ -25,7 +25,7 @@ class Request
         }
 
         $jsonUrl = isset($_ENV['TW_JSON_URL']) ? $_ENV['TW_JSON_URL'] . "/{$hash}.json" : "https://json.themewright.com/{$hash}.json";
-        $json = file_get_contents($jsonUrl);
+        $json = @file_get_contents($jsonUrl);
 
         $this->json = json_decode($json);
     }
@@ -82,15 +82,15 @@ class Request
         $errors = [];
 
         if (is_null($this->get('id'))) {
-            $errors[] = "The 'id' parameter is required";
+            $errors[] = "Error: The 'id' parameter is required";
         }
 
         if (is_null($this->get('commit'))) {
-            $errors[] = "The 'commit' parameter is required";
+            $errors[] = "Error: The 'commit' parameter is required";
         }
 
         if (is_null($this->get('version'))) {
-            $errors[] = "The 'version' parameter is required";
+            $errors[] = "Error: The 'version' parameter is required";
         }
 
         return $errors;
