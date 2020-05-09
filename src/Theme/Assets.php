@@ -114,7 +114,7 @@ class Assets
     {
         $assets = [];
         $raw = $this->index->getContent();
-        $lines = explode(PHP_EOL, $raw);
+        $lines = preg_split('/\R/', $raw);
 
         foreach ($lines as $line) {
             $parts = explode(',', $line);

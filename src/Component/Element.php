@@ -506,7 +506,7 @@ class Element
     protected function formatArgsPhp(string $argKey)
     {
         $lines = [];
-        $input = isset($this->args->$argKey->php) ? explode(PHP_EOL, $this->args->$argKey->php) : [];
+        $input = isset($this->args->$argKey->php) ? preg_split('/\R/', $this->args->$argKey->php) : [];
 
         foreach ($input as $line) {
             if (!in_array(trim($line, ' '), ['<?php', '?' . '>'])) {
