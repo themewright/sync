@@ -8,11 +8,11 @@ use ThemeWright\Sync\Helper\Str;
 class Stylesheet
 {
     /**
-     * The stylesheet file.
+     * The Filesystem instance.
      *
-     * @var \ThemeWright\Sync\Filesystem\File
+     * @var \ThemeWright\Sync\Filesystem\Filesystem
      */
-    protected $file;
+    protected $fs;
 
     /**
      * The stylesheet parameters.
@@ -36,7 +36,7 @@ class Stylesheet
     protected $messages;
 
     /**
-     * Handles the main stylesheet (style.css) of a theme.
+     * Handles the main stylesheet (style.css) and screenshot (screenshot.png).
      *
      * @param  string  $themeDir
      * @param  mixed  $data
@@ -45,7 +45,7 @@ class Stylesheet
      */
     public function __construct(string $themeDir, &$data, &$messages = [])
     {
-        $this->file = (new Filesystem($themeDir))->file('style.css');
+        $this->fs = new Filesystem($themeDir);
         $this->data = &$data;
         $this->messages = &$messages;
 
@@ -53,10 +53,10 @@ class Stylesheet
     }
 
     /**
-     * Gets a detail value or "false" if it doesn't exists.
+     * Gets a "detail" value.
      *
      * @param  string  $name
-     * @return string|false
+     * @return mixed
      */
     public function get(string $name)
     {
@@ -66,6 +66,9 @@ class Stylesheet
                 break;
             case 'commit':
                 return (int) ($this->details['twcid'] ?? false);
+                break;
+            case 'screenshot':
+                return $this->details['twss'] ?? false;
                 break;
             default:
                 return $this->details[$name] ?? false;
@@ -80,7 +83,7 @@ class Stylesheet
      */
     protected function parseDetails()
     {
-        if (preg_match('/(?:\/\*)(.+?)(?:\*\/)/s', $this->file->getContent(), $comment)) {
+        if (preg_match('/(?:\/\*)(.+?)(?:\*\/)/s', $this->fs->file('style.css')->getContent(), $comment)) {
             preg_match_all('/^[\s\*]*(.+?): *(.+)$/m', $comment[1], $details);
 
             foreach ($details[1] as $i => $name) {
@@ -98,6 +101,13 @@ class Stylesheet
      */
     public function build(float $time = null)
     {
+        $screenshot = $this->fs->file('screenshot.png');
+
+        if (!$screenshot->exists() || $this->data->screenshot != $this->get('screenshot')) {
+            $screenshotContent = (string) @file_get_contents($this->data->screenshot);
+            $screenshot->setContent($screenshotContent)->saveWithMessages($this->messages);
+        }
+
         $newContent = [
             '/*',
             'Theme Name: ' . $this->data->name,
@@ -133,9 +143,10 @@ class Stylesheet
 
         $newContent[] = 'TWID: ' . $this->data->id;
         $newContent[] = 'TWCID: ' . $this->data->commit;
+        $newContent[] = 'TWSS: ' . $this->data->screenshot;
         $newContent[] = '*/';
 
-        $this->file->setContent($newContent)->saveWithMessages($this->messages);
+        $this->fs->file('style.css')->setContent($newContent)->saveWithMessages($this->messages);
 
         $this->parseDetails();
 
