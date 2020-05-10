@@ -8,7 +8,7 @@ function tw_register_required_plugins() {
 	$plugins = array(
 		array(
 			'name'         => 'Advanced Custom Fields PRO',
-			'slug'         => 'advanced-custom-fields',
+			'slug'         => 'advanced-custom-fields-pro',
 			'source'       => 'https://github.com/themewright/advanced-custom-fields-pro/archive/master.zip',
 			'external_url' => 'https://www.advancedcustomfields.com/pro/',
 			'required'     => false,
