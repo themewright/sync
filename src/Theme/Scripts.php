@@ -79,15 +79,40 @@ class Scripts
 
         $inFooter = $script->inFooter ? 'true' : 'false';
 
+        $code = [
+            "// Enqueue script: {$script->handle} (#{$script->id})",
+            "function tw_enqueue_script_{$handleSnake}() {",
+            "\twp_register_script( '{$script->handle}', {$src}, {$deps}, {$ver}, {$inFooter} );",
+        ];
+
+        if ($script->localize) {
+            $code[] = "\twp_localize_script(";
+            $code[] = "\t\t'{$script->handle}',";
+            $code[] = "\t\t'{$script->localizationObject}',";
+
+            if ($script->localizationData) {
+                $code[] = "\t\tarray(";
+
+                foreach ($script->localizationData as $data) {
+                    $code[] = "\t\t\t{$data->name} => {$data->default},";
+                }
+
+                $code[] = "\t\t)";
+            } else {
+                $code[] = "\t\tarray()";
+            }
+
+            $code[] = "\t);";
+
+        }
+
+        $code[] = "\twp_enqueue_script( '{$script->handle}' );";
+        $code[] = "}";
+        $code[] = "add_action( 'wp_enqueue_scripts', 'tw_enqueue_script_{$handleSnake}' );";
+
         $chunk = [
             'type' => 'script',
-            'code' => [
-                "// Enqueue script: {$script->handle} (#{$script->id})",
-                "function tw_enqueue_script_{$handleSnake}() {",
-                "\twp_enqueue_script( '{$script->handle}', {$src}, {$deps}, {$ver}, {$inFooter} );",
-                "}",
-                "add_action( 'wp_enqueue_scripts', 'tw_enqueue_script_{$handleSnake}' );",
-            ],
+            'code' => $code,
         ];
 
         $chunk['code'] = implode(PHP_EOL, $chunk['code']);

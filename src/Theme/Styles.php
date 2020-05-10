@@ -82,7 +82,8 @@ class Styles
             'code' => [
                 "// Enqueue CSS stylesheet: {$style->handle} (#{$style->id})",
                 "function tw_enqueue_style_{$handleSnake}() {",
-                "\twp_enqueue_style( '{$style->handle}', {$src}, {$deps}, {$ver}, '{$style->media}' );",
+                "\twp_register_style( '{$style->handle}', {$src}, {$deps}, {$ver}, '{$style->media}' );",
+                "\twp_enqueue_style( '{$style->handle}' );",
                 "}",
                 "add_action( 'wp_enqueue_scripts', 'tw_enqueue_style_{$handleSnake}' );",
             ],
