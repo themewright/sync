@@ -91,7 +91,7 @@ class Application
         if ($latest->tag_name > $version) {
             (new Response())->addMany([
                 "Error: Outdated client version ({$version} &rarr; {$latest->tag_name})",
-                "Run `composer update` to get the latest version",
+                "#Run `composer update` to get the latest version.#",
             ])->send();
         }
     }
