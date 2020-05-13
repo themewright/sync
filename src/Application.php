@@ -38,7 +38,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.9.3';
+    public static $version = '0.9.4';
 
     /**
      * The Request instance.
@@ -86,11 +86,11 @@ class Application
         ]);
 
         $version = static::$version;
-        $latest = json_decode(file_get_contents('https://api.github.com/repos/themewright/sync/releases/latest', false, $context));
+        $info = json_decode(file_get_contents('https://app.themewright.com/info.json', false, $context));
 
-        if ($latest->tag_name > $version) {
+        if ($info->syncVersion > $version) {
             (new Response())->addMany([
-                "Error: Outdated client version ({$version} &rarr; {$latest->tag_name})",
+                "Error: Outdated client version ({$version} &rarr; {$info->syncVersion})",
                 "#Run `composer update` to get the latest version.#",
             ])->send();
         }
