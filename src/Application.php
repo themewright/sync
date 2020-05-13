@@ -38,7 +38,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.9.4';
+    public static $version = '0.9.5';
 
     /**
      * The Request instance.
@@ -86,7 +86,7 @@ class Application
         ]);
 
         $version = static::$version;
-        $info = json_decode(file_get_contents('https://app.themewright.com/info.json', false, $context));
+        $info = json_decode(file_get_contents('https://api.themewright.com', false, $context));
 
         if ($info->syncVersion > $version) {
             (new Response())->addMany([
