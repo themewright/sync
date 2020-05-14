@@ -68,6 +68,12 @@ class Assets
         $currentAssets = $this->parseIndex();
         $assetIds = array_column($this->data->assets, 'id');
 
+        foreach ($currentAssets as $currentAsset) {
+            if (!in_array($currentAsset->id, $assetIds)) {
+                $this->fs->file('assets/' . $currentAsset->path)->deleteWithMessages($this->messages);
+            }
+        }
+
         foreach ($this->data->assets as $asset) {
             if (isset($currentAssets[$asset->id])) {
                 $currentAsset = $currentAssets[$asset->id];
@@ -92,12 +98,6 @@ class Assets
                 $content = @file_get_contents($url);
                 $content = $content !== false ? $content : '';
                 $this->fs->file('assets/' . $asset->path)->setContent($content)->saveWithMessages($this->messages);
-            }
-        }
-
-        foreach ($currentAssets as $currentAsset) {
-            if (!in_array($currentAsset->id, $assetIds)) {
-                $this->fs->file('assets/' . $currentAsset->path)->deleteWithMessages($this->messages);
             }
         }
 
