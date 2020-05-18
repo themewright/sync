@@ -221,6 +221,9 @@ class Functions
                     case 'configuration-file':
                         $pattern = '/\/\/ Register configuration file: [a-zA-Z0-9_\-\.]+\.(?:json|js) \(#([0-9]+)\)/';
                         break;
+                    case 'editor':
+                        $pattern = '/(\/\/ TinyMCE editor settings)/';
+                        break;
                     default:
                         $pattern = null;
                         break;
@@ -282,6 +285,8 @@ class Functions
             return 'php-file';
         } else if (strpos($code, '// Register configuration file') === 0) {
             return 'configuration-file';
+        } else if (strpos($code, '// TinyMCE editor settings') === 0) {
+            return 'editor';
         } else {
             return false;
         }

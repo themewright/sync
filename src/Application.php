@@ -13,6 +13,7 @@ use ThemeWright\Sync\Theme\Assets;
 use ThemeWright\Sync\Theme\BlockGroups;
 use ThemeWright\Sync\Theme\Blocks;
 use ThemeWright\Sync\Theme\ConfigurationFiles;
+use ThemeWright\Sync\Theme\Editor;
 use ThemeWright\Sync\Theme\Filters;
 use ThemeWright\Sync\Theme\Functions;
 use ThemeWright\Sync\Theme\Includes;
@@ -38,7 +39,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.9.6';
+    public static $version = '0.9.7';
 
     /**
      * The Request instance.
@@ -153,6 +154,7 @@ class Application
             (new Assets($themeDir, $data, $messages))->build();
             (new Styles($themeDir, $data, $functions))->build();
             (new Scripts($themeDir, $data, $functions))->build();
+            (new Editor($themeDir, $data, $functions, $messages))->build();
             $functions->build();
             $stylesScss->build();
             $mainJs->build();
@@ -257,6 +259,11 @@ class Application
                     break;
                 case 'configuration-file':
                     (new ConfigurationFiles($themeDir, $data, $functions, $messages))->build();
+                    $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'editor':
+                    (new Editor($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
                     $stylesheet->build($time);
                     break;
