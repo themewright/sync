@@ -59,7 +59,7 @@ class Editor
      */
     public function build()
     {
-        $this->fs->file('assets/scss/editor.scss')->setContent($this->data->editor->scss)->saveWithMessages($this->messages);
+        $this->fs->file('assets/scss/editor.scss')->setContent($this->data->editor->scss)->spacesToTabs()->saveWithMessages($this->messages);
 
         $this->buildSettingsFile();
 

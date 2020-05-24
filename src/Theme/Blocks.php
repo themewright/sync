@@ -160,6 +160,8 @@ class Blocks
             if (isset($fieldArgs->fieldSet)) {
                 $i = array_search($fieldArgs->fieldSet, array_column($block->fieldSets, 'id'));
 
+                FieldGroup::appendToTwKeys('_', $block->fieldSets[$i]->fieldGroup->fields);
+
                 foreach ($block->fieldSets[$i]->fieldGroup->fields as $fieldSetFieldArgs) {
                     $field = (new Field($fieldSetFieldArgs, $block->fieldSets))->build(2, 'field_', 'ArrayArgs');
                     $fields->add('', $field);

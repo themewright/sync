@@ -88,6 +88,8 @@ class FieldGroup
             if (isset($fieldArgs->fieldSet)) {
                 $i = array_search($fieldArgs->fieldSet, array_column($this->fieldSets, 'id'));
 
+                static::appendToTwKeys('_', $this->fieldSets[$i]->fieldGroup->fields);
+
                 foreach ($this->fieldSets[$i]->fieldGroup->fields as $fieldSetFieldArgs) {
                     $field = (new Field($fieldSetFieldArgs, $this->fieldSets))->build($indent + 1, "field_{$this->id}_", 'ArrayArgs');
                     $fields->add('', $field);
@@ -128,6 +130,43 @@ class FieldGroup
     }
 
     /**
+     * Appends a string to 'twKey' values.
+     *
+     * @param  string  $suffix
+     * @param  mixed  $fields
+     * @param  boolean  $conditinalLogic
+     * @return void
+     */
+    public static function appendToTwKeys($suffix, &$fields, $conditinalLogic = false)
+    {
+        if ($conditinalLogic) {
+            foreach ($fields as $clArgs) {
+                if (isset($clArgs->field)) {
+                    $clArgs->field .= $suffix;
+                } else if (is_array($clArgs)) {
+                    static::appendToTwKeys($suffix, $clArgs, true);
+                }
+            }
+        } else {
+            foreach ($fields as $fieldArgs) {
+                $fieldArgs->twKey .= $suffix;
+
+                if (isset($fieldArgs->conditionalLogic)) {
+                    static::appendToTwKeys($suffix, $fieldArgs->conditionalLogic, true);
+                }
+
+                if (isset($fieldArgs->subFields)) {
+                    static::appendToTwKeys($suffix, $fieldArgs->subFields);
+                }
+
+                if (isset($fieldArgs->layouts)) {
+                    static::appendToTwKeys($suffix, $fieldArgs->layouts);
+                }
+            }
+        }
+    }
+
+    /**
      * Replaces 'twKey' with 'key' in conditional logics.
      *
      * @param  ThemeWright\Sync\Helper\ArrayArgs  $fields
@@ -155,14 +194,10 @@ class FieldGroup
                         }
                     }
                 }
-            }
 
-            if (isset($field->value->args['sub_fields'])) {
-                static::fixConditionalLogics($field->value->args['sub_fields']->value, $keyMap);
-            }
-
-            if (isset($field->value->args['layouts'])) {
-                static::fixConditionalLogics($field->value->args['layouts']->value, $keyMap);
+                if ($arg->key == 'sub_fields' || $arg->key == 'layouts') {
+                    static::fixConditionalLogics($arg->value, $keyMap);
+                }
             }
         }
     }
@@ -181,12 +216,10 @@ class FieldGroup
                 $keyMap[$field->value->args['tw_key']->value] = $field->value->args['key']->value;
             }
 
-            if (isset($field->value->args['sub_fields'])) {
-                static::mapFieldKeys($field->value->args['sub_fields']->value, $keyMap);
-            }
-
-            if (isset($field->value->args['layouts'])) {
-                static::mapFieldKeys($field->value->args['layouts']->value, $keyMap);
+            foreach ($field->value->args as $arg) {
+                if ($arg->key == 'sub_fields' || $arg->key == 'layouts') {
+                    static::mapFieldKeys($arg->value, $keyMap);
+                }
             }
         }
 

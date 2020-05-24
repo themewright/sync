@@ -5,6 +5,7 @@ namespace ThemeWright\Sync\Theme;
 use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Component\FieldGroup;
 use ThemeWright\Sync\Filesystem\Filesystem;
+use ThemeWright\Sync\Helper\Str;
 
 class Templates
 {
@@ -156,7 +157,10 @@ class Templates
             }
 
             if ($template->type == 'template' && $template->name != 'page') {
-                $viewContent = "<?php /* Template name: {$template->name} */ ?" . ">" . PHP_EOL . $viewContent;
+                $name = preg_replace('/^template-/', '', $template->name);
+                $name = str_replace('-', ' ', $name);
+                $name = Str::title($name);
+                $viewContent = "<?php /* Template name: {$name} */ ?" . ">" . PHP_EOL . $viewContent;
             }
 
             $view->setContent($viewContent)->spacesToTabs()->saveWithMessages($this->messages);
