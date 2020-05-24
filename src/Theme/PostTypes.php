@@ -224,7 +224,7 @@ class PostTypes
                         }
                     }
 
-                    $args[$key] = $supports;
+                    $args[$key] = $supports ?? false;
                     break;
                 default:
                     $args[$key] = $value;
