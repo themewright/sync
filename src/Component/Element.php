@@ -349,42 +349,44 @@ class Element
             }
         }
 
+        $htmlLines = [];
+
         // Opening tag
-        $lines[] = str_repeat("\t", $indent) . '<' . $this->node . $classesAttr . $attributesAttr . '>';
+        $htmlLines[] = str_repeat("\t", $indent) . '<' . $this->node . $classesAttr . $attributesAttr . '>';
 
         // Inner text
         if (count($this->text) > 1) {
-            $lines[] = str_repeat("\t", $indent + 1) . '<?php';
+            $htmlLines[] = str_repeat("\t", $indent + 1) . '<?php';
 
             foreach ($this->text as $textLine) {
-                $lines[] = str_repeat("\t", $indent + 2) . $textLine;
+                $htmlLines[] = str_repeat("\t", $indent + 2) . $textLine;
             }
 
-            $lines[] = str_repeat("\t", $indent + 1) . '?' . '>';
+            $htmlLines[] = str_repeat("\t", $indent + 1) . '?' . '>';
         } else if ($this->text) {
-            $lines[] = str_repeat("\t", $indent + 1) . '<?php ' . $this->text[0] . ' ?' . '>';
+            $htmlLines[] = str_repeat("\t", $indent + 1) . '<?php ' . $this->text[0] . ' ?' . '>';
         }
 
         // Nested elements
         foreach ($this->children as $child) {
-            $lines[] = $child->parse($indent + 1);
+            $htmlLines[] = $child->parse($indent + 1);
         }
 
         // Ending tag
         if (!in_array($this->node, static::$selfClosingTags)) {
-            $lines[] = str_repeat("\t", $indent) . '</' . $this->node . '>';
+            $htmlLines[] = str_repeat("\t", $indent) . '</' . $this->node . '>';
         }
 
         // One line formatting
-        if (count($lines) == 3 && !$this->children) {
-            $lines = array_map(function ($line) {
+        if (count($htmlLines) <= 3 && !$this->children) {
+            $htmlLines = array_map(function ($line) {
                 return trim($line);
-            }, $lines);
+            }, $htmlLines);
 
-            $lines = [str_repeat("\t", $indent) . implode('', $lines)];
+            $htmlLines = [str_repeat("\t", $indent) . implode('', $htmlLines)];
         }
 
-        return $lines;
+        return array_merge($lines, $htmlLines);
     }
 
     /**
