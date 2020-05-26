@@ -48,9 +48,10 @@ class BlockGroups
     public function build()
     {
         foreach ($this->data->blockGroups as $blockGroup) {
-            $blockList = implode(', ', array_map(function ($block) {
-                return "'{$block->name}'";
-            }, $blockGroup->blocks));
+            $blockList = implode(', ', array_map(function ($blockId) use ($blockGroup) {
+                $i = array_search($blockId, array_column($blockGroup->blocks, 'id'));
+                return "'{$blockGroup->blocks[$i]->name}'";
+            }, $blockGroup->blockIds));
 
             $chunk = [
                 'type' => 'block-group',
