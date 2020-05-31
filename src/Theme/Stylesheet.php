@@ -125,7 +125,7 @@ class Stylesheet
             $newContent[] = 'Tags: ' . $this->data->tags;
         }
 
-        $newContent[] = 'Author: ' . $this->data->tags;
+        $newContent[] = 'Author: ' . $this->data->author;
 
         if ($this->data->authorUri) {
             $newContent[] = 'Author URI: ' . $this->data->authorUri;
