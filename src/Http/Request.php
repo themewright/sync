@@ -33,7 +33,7 @@ class Request
     /**
      * Returns the JSON parameters.
      *
-     * @return array
+     * @return mixed
      */
     public function all()
     {

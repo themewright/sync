@@ -212,6 +212,9 @@ class Functions
                     case 'ajax':
                         $pattern = '/\/\/ Add Ajax: [a-z0-9_]+ \(#([0-9]+)\)/';
                         break;
+                    case 'shortcode':
+                        $pattern = '/\/\/ Add shortcode: [a-z0-9_]+ \(#([0-9]+)\)/';
+                        break;
                     case 'options-page':
                         $pattern = '/\/\/ Register options page: [a-z0-9_-]+ \(#([0-9]+)\)/';
                         break;
@@ -279,6 +282,8 @@ class Functions
             return 'action';
         } else if (strpos($code, '// Add Ajax') === 0) {
             return 'ajax';
+        } else if (strpos($code, '// Add shortcode') === 0) {
+            return 'shortcode';
         } else if (strpos($code, '// Register options page') === 0) {
             return 'options-page';
         } else if (strpos($code, '// Include file') === 0) {

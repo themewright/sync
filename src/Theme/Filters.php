@@ -89,10 +89,10 @@ class Filters
      */
     public function deleteExceptData()
     {
-        $names = array_column($this->data->filters, 'name');
+        $slugs = array_column($this->data->filters, 'name');
 
-        foreach ($names as $i => $name) {
-            $names[$i] = str_replace('_', '-', $name);
+        foreach ($slugs as $i => $name) {
+            $slugs[$i] = Str::slug($name);
         }
 
         $files = $this->fs->getThemeFiles('includes/filters');
@@ -100,7 +100,7 @@ class Filters
         foreach ($files as $file) {
             preg_match('/^filter-([a-z0-9-]+)\.php$/', $file->basename, $filterMatch);
 
-            if ($filterMatch && !in_array($filterMatch[1], $names)) {
+            if ($filterMatch && !in_array($filterMatch[1], $slugs)) {
                 $file->deleteWithMessages($this->messages);
             }
         }

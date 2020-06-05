@@ -89,10 +89,10 @@ class Ajaxes
      */
     public function deleteExceptData()
     {
-        $names = array_column($this->data->ajax, 'action');
+        $slugs = array_column($this->data->ajax, 'action');
 
-        foreach ($names as $i => $name) {
-            $names[$i] = str_replace('_', '-', $name);
+        foreach ($slugs as $i => $name) {
+            $slugs[$i] = Str::slug($name);
         }
 
         $files = $this->fs->getThemeFiles('includes/ajax');
@@ -100,7 +100,7 @@ class Ajaxes
         foreach ($files as $file) {
             preg_match('/^ajax-([a-z0-9-]+)\.php$/', $file->basename, $ajaxMatch);
 
-            if ($ajaxMatch && !in_array($ajaxMatch[1], $names)) {
+            if ($ajaxMatch && !in_array($ajaxMatch[1], $slugs)) {
                 $file->deleteWithMessages($this->messages);
             }
         }

@@ -3,6 +3,7 @@
 namespace ThemeWright\Sync\Theme;
 
 use ThemeWright\Sync\Filesystem\Filesystem;
+use ThemeWright\Sync\Helper\ArrayArgs;
 
 class Scripts
 {
@@ -93,9 +94,16 @@ class Scripts
             if ($script->localizationData) {
                 $code[] = "\t\tarray(";
 
+                $args = new ArrayArgs();
+
                 foreach ($script->localizationData as $data) {
-                    $code[] = "\t\t\t{$data->name} => {$data->default},";
+                    $args->add(
+                        $data->name,
+                        '@php:' . ($data->default != '' ? $data->default : 'null')
+                    );
                 }
+
+                $code = array_merge($code, $args->format(3, true));
 
                 $code[] = "\t\t)";
             } else {

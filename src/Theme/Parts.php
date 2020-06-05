@@ -4,6 +4,7 @@ namespace ThemeWright\Sync\Theme;
 
 use ThemeWright\Sync\Component\Element;
 use ThemeWright\Sync\Filesystem\Filesystem;
+use ThemeWright\Sync\Helper\ArrayArgs;
 
 class Parts
 {
@@ -90,7 +91,7 @@ class Parts
                 }
             }
 
-            $file = $this->fs->file('views/parts/' . $part->name . '.php');
+            $view = $this->fs->file('views/parts/' . $part->name . '.php');
             $scss = $this->fs->file('assets/scss/parts/_' . $part->name . '.scss');
             $js = $this->fs->file('assets/js/parts/' . $part->name . '.js');
 
@@ -111,16 +112,16 @@ class Parts
             }
 
             if ($part->viewRaw) {
-                $fileContent = $part->viewRaw;
+                $viewContent = $part->viewRaw;
             } else {
                 $elements = array_map(function ($args) use ($part) {
                     return (new Element($args, $this->data->domain, $part->templates, $part->parts, $part->blockGroups))->parse();
                 }, $part->view);
 
-                $fileContent = implode(PHP_EOL, $elements);
+                $viewContent = implode(PHP_EOL, $elements);
             }
 
-            $file->setContent($fileContent)->spacesToTabs()->saveWithMessages($this->messages);
+            $view->setContent($viewContent)->spacesToTabs()->saveWithMessages($this->messages);
 
             $this->functions->updateChunk($chunk);
         }
@@ -129,7 +130,7 @@ class Parts
     /**
      * Deletes all files associated to a template part.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
@@ -146,7 +147,7 @@ class Parts
     /**
      * Deletes template parts and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @return ThemeWright\Sync\Theme\Parts
      */
@@ -167,13 +168,13 @@ class Parts
             }
         }
 
-        $files = $this->fs->getThemeFiles('views/parts');
+        $views = $this->fs->getThemeFiles('views/parts');
 
-        foreach ($files as $file) {
-            preg_match('/^([a-z0-9-]+)\.php$/', $file->basename, $partMatch);
+        foreach ($views as $view) {
+            preg_match('/^([a-z0-9-]+)\.php$/', $view->basename, $partMatch);
 
             if ($partMatch && !in_array($partMatch[1], $names)) {
-                $file->deleteWithMessages($this->messages);
+                $view->deleteWithMessages($this->messages);
             }
         }
 
@@ -200,11 +201,16 @@ class Parts
             $chunk['code'][] = "\t'{$part->name}',";
             $chunk['code'][] = "\tarray(";
 
+            $args = new ArrayArgs();
+
             foreach ($part->args as $arg) {
-                $name = ltrim($arg->name, '$');
-                $default = $arg->default ?: 'null';
-                $chunk['code'][] = "\t\t'{$name}' => {$default},";
+                $args->add(
+                    ltrim($arg->name, '$'),
+                    '@php:' . ($arg->default != '' ? $arg->default : 'null')
+                );
             }
+
+            $chunk['code'] = array_merge($chunk['code'], $args->format(2));
 
             $chunk['code'][] = "\t)";
             $chunk['code'][] = ");";

@@ -26,6 +26,7 @@ use ThemeWright\Sync\Theme\PhpFiles;
 use ThemeWright\Sync\Theme\PostTypes;
 use ThemeWright\Sync\Theme\Scripts;
 use ThemeWright\Sync\Theme\ScssPartials;
+use ThemeWright\Sync\Theme\Shortcodes;
 use ThemeWright\Sync\Theme\Styles;
 use ThemeWright\Sync\Theme\Stylesheet;
 use ThemeWright\Sync\Theme\StylesScss;
@@ -39,7 +40,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.9.9';
+    public static $version = '0.9.10';
 
     /**
      * The Request instance.
@@ -151,6 +152,7 @@ class Application
             (new Filters($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Actions($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
             (new Ajaxes($themeDir, $data, $functions, $messages))->deleteExceptData()->build();
+            (new Shortcodes($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->deleteExceptData()->build();
             (new Assets($themeDir, $data, $messages))->build();
             (new Styles($themeDir, $data, $functions))->build();
             (new Scripts($themeDir, $data, $functions))->build();
@@ -245,6 +247,13 @@ class Application
                 case 'ajax':
                     (new Ajaxes($themeDir, $data, $functions, $messages))->build();
                     $functions->build();
+                    $stylesheet->build($time);
+                    break;
+                case 'shortcode':
+                    (new Shortcodes($themeDir, $data, $functions, $stylesScss, $mainJs, $messages))->build();
+                    $functions->build();
+                    $stylesScss->build();
+                    $mainJs->build();
                     $stylesheet->build($time);
                     break;
                 case 'options-page':

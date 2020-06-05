@@ -172,7 +172,7 @@ class Templates
     /**
      * Deletes all files associated to a template.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Templates
@@ -190,7 +190,7 @@ class Templates
     /**
      * Deletes templates and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @return ThemeWright\Sync\Theme\Templates
      */

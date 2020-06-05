@@ -133,14 +133,19 @@ class ArrayArgs
      * Aligns and outputs the array arguments as an array of string.
      *
      * @param  int  $indent
+     * @param  bool  $rawKeys
      * @return string[]
      */
-    public function format($indent = 1)
+    public function format($indent = 1, $rawKeys = false)
     {
         $out = [];
 
         foreach ($this->args as $arg) {
-            $key = $arg->key != '' ? "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
+            if ($rawKeys) {
+                $key = $arg->key != '' ? $arg->key . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
+            } else {
+                $key = $arg->key != '' ? "'{$arg->key}'" . str_repeat(' ', $this->maxKeyChars - strlen($arg->key)) . " => " : '';
+            }
 
             if ($arg->value instanceof ArrayArgs) {
                 $out[] = str_repeat("\t", $indent) . $key . "array(";

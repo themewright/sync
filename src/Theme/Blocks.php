@@ -185,7 +185,7 @@ class Blocks
     /**
      * Deletes all files associated to a content block.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @param  string  $name
      * @return ThemeWright\Sync\Theme\Parts
@@ -205,16 +205,16 @@ class Blocks
     /**
      * Deletes content blocks and associated files which are not included in the current $data object.
      *
-     * This method does not delete TW functions code chunks, styles.scss and main.js.
+     * This method does not delete TW functions code chunks.
      *
      * @return ThemeWright\Sync\Theme\Blocks
      */
     public function deleteExceptData()
     {
-        $names = array_column($this->data->blocks, 'name');
+        $slugs = array_column($this->data->blocks, 'name');
 
-        foreach ($names as $i => $name) {
-            $names[$i] = str_replace('_', '-', $name);
+        foreach ($slugs as $i => $name) {
+            $slugs[$i] = Str::slug($name);
         }
 
         $fieldsFiles = $this->fs->getThemeFiles('includes/blocks');
@@ -222,7 +222,7 @@ class Blocks
         foreach ($fieldsFiles as $fields) {
             preg_match('/^fields-([a-z0-9-]+)\.php$/', $fields->basename, $partMatch);
 
-            if ($partMatch && !in_array($partMatch[1], $names)) {
+            if ($partMatch && !in_array($partMatch[1], $slugs)) {
                 $fields->deleteWithMessages($this->messages);
             }
         }
@@ -235,7 +235,7 @@ class Blocks
         foreach ($assets as $asset) {
             preg_match('/^_?([a-z0-9-]+)\.(?:scss|js)$/', $asset->basename, $partMatch);
 
-            if ($partMatch && !in_array($partMatch[1], $names)) {
+            if ($partMatch && !in_array($partMatch[1], $slugs)) {
                 $asset->deleteWithMessages($this->messages);
             }
         }
@@ -245,7 +245,7 @@ class Blocks
         foreach ($views as $view) {
             preg_match('/^([a-z0-9-]+)\.php$/', $view->basename, $partMatch);
 
-            if ($partMatch && !in_array($partMatch[1], $names)) {
+            if ($partMatch && !in_array($partMatch[1], $slugs)) {
                 $view->deleteWithMessages($this->messages);
             }
         }
@@ -256,7 +256,7 @@ class Blocks
     /**
      * Creates a TW functions code chunk for a content block object.
      *
-     * @param mixed $block
+     * @param  mixed  $block
      * @return array
      */
     protected function createChunk($block)

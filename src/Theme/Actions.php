@@ -89,10 +89,10 @@ class Actions
      */
     public function deleteExceptData()
     {
-        $names = array_column($this->data->actions, 'name');
+        $slugs = array_column($this->data->actions, 'name');
 
-        foreach ($names as $i => $name) {
-            $names[$i] = str_replace('_', '-', $name);
+        foreach ($slugs as $i => $name) {
+            $slugs[$i] = Str::slug($name);
         }
 
         $files = $this->fs->getThemeFiles('includes/actions');
@@ -100,7 +100,7 @@ class Actions
         foreach ($files as $file) {
             preg_match('/^action-([a-z0-9-]+)\.php$/', $file->basename, $actionMatch);
 
-            if ($actionMatch && !in_array($actionMatch[1], $names)) {
+            if ($actionMatch && !in_array($actionMatch[1], $slugs)) {
                 $file->deleteWithMessages($this->messages);
             }
         }
