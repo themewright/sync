@@ -40,7 +40,7 @@ class Application
      *
      * @var string
      */
-    public static $version = '0.9.10';
+    public static $version = '0.9.11';
 
     /**
      * The Request instance.
@@ -90,7 +90,7 @@ class Application
         $version = static::$version;
         $info = json_decode(file_get_contents('https://api.themewright.com', false, $context));
 
-        if ($info->syncVersion > $version) {
+        if (version_compare($version, $info->syncVersion, '<')) {
             (new Response())->addMany([
                 "Error: Outdated client version ({$version} &rarr; {$info->syncVersion})",
                 "#Run `composer update` to get the latest version.#",
