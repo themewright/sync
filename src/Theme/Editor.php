@@ -198,7 +198,7 @@ class Editor
                     'title' => $styleFormat->title,
                     $styleFormat->mode => $styleFormat->selector,
                     'attributes' => array(
-                        'class' => implode(' ', $styleFormat->class), // @todo test when class empty
+                        'class' => implode(' ', $styleFormat->class),
                     ),
                     'wrapper' => $styleFormat->wrapper,
                 );
