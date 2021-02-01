@@ -328,7 +328,7 @@ class Element
                 $attributesAttr = [];
 
                 foreach ($this->attributes as $line) {
-                    if (preg_match('/^\s*\'([a-zA-Z0-9_-]+)\'\s*=>\s*\'?([a-zA-Z0-9_-]+?|)\'?,?$/', $line, $match)) {
+                    if (preg_match('/^\s*\'([a-zA-Z0-9_-]+)\'\s*=>\s*\'?([a-zA-Z0-9\s_-]+?|)\'?,?$/', $line, $match)) {
                         $attributesAttr[] = $match[2] ? $match[1] . '="' . $match[2] . '"' : $match[1];
                     }
                 }
